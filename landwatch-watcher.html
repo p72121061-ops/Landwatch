@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LandWatch — Watcher</title>
+<title>LandWatch — Watcher Login</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -19,6 +19,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--accent);}
 .logo span{color:var(--text);}
 .watcher-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+#wLoginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+.wlogin-logo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--accent);margin-bottom:4px;}
+.wlogin-logo span{color:var(--text);}
+.wlogin-badge{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:28px;}
+.wlogin-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;align-self:flex-start;width:100%;max-width:360px;}
+.wlogin-input{width:100%;max-width:360px;border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--surface);outline:none;margin-bottom:12px;}
+.wlogin-input:focus{border-color:var(--accent);}
+.wlogin-btn{width:100%;max-width:360px;padding:14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+.wlogin-hint{font-size:12px;color:var(--sub);margin-top:20px;text-align:center;line-height:1.8;}
+.wlogin-hint b{color:var(--accent);}
+.wlogin-client-link{font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;margin-top:14px;}
+.wlogin-client-link:hover{color:var(--accent);}
 .drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:400;}
 .drawer-overlay.open{display:block;}
 .drawer{position:fixed;top:0;left:-280px;width:280px;height:100%;background:var(--surface);z-index:500;transition:left .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
@@ -144,6 +156,26 @@ main{max-width:480px;margin:0 auto;padding:16px 14px 100px;display:flex;flex-dir
 </head>
 <body>
 
+<!-- WATCHER LOGIN -->
+<div id="wLoginScreen">
+  <div class="wlogin-logo">Land<span>Watch</span></div>
+  <div class="wlogin-badge">Watcher Portal</div>
+  <div class="wlogin-label">Watcher ID</div>
+  <input class="wlogin-input" type="text" id="wCodeInput" placeholder="e.g. WR-001">
+  <div class="wlogin-label" style="margin-top:8px;">Password</div>
+  <input class="wlogin-input" type="password" id="wPassInput" placeholder="Enter password">
+  <button class="wlogin-btn" onclick="doWatcherLogin()">Login →</button>
+  <div class="wlogin-hint">
+    Demo credentials:<br>
+    <b>WR-001</b> / pass: <b>watch123</b> · Rahul Verma<br>
+    <b>WR-002</b> / pass: <b>watch123</b> · Virat Kohli<br>
+    <b>WR-003</b> / pass: <b>watch123</b> · Rohit Sharma
+  </div>
+  <div class="wlogin-client-link" onclick="window.location.href='landwatch-client.html'">Are you a client? Login here →</div>
+</div>
+
+<!-- WATCHER APP -->
+<div id="wAppShell" style="display:none;">
 <div class="topbar">
   <div class="topbar-left">
     <div class="hamburger" onclick="openDrawer()">☰</div>
@@ -512,6 +544,33 @@ function openAlertDetail(i){
 }
 
 renderPending();populateSelects();
+
+// ── WATCHER LOGIN ──
+const watcherAccounts=[
+  {id:'WR-001',pass:'watch123',name:'Rahul Verma',init:'RV',role:'Senior Watcher'},
+  {id:'WR-002',pass:'watch123',name:'Virat Kohli',init:'VK',role:'Group Leader'},
+  {id:'WR-003',pass:'watch123',name:'Rohit Sharma',init:'RS',role:'Senior Watcher'},
+];
+
+function doWatcherLogin(){
+  const id=document.getElementById('wCodeInput').value.trim().toUpperCase();
+  const pass=document.getElementById('wPassInput').value.trim();
+  if(!id||!pass){showToast('⚠️ Enter ID and password');return;}
+  const acc=watcherAccounts.find(a=>a.id===id&&a.pass===pass);
+  if(!acc){showToast('⚠️ Wrong ID or password');return;}
+  document.getElementById('wLoginScreen').style.display='none';
+  document.getElementById('wAppShell').style.display='block';
+  // Update drawer with logged in watcher name
+  document.querySelector('.drawer-name').textContent=acc.name;
+  document.querySelector('.drawer-role').textContent=acc.role+' · '+acc.id;
+  document.querySelector('.profile-name').textContent=acc.name;
+  document.querySelector('.profile-role-txt').textContent=acc.role+' · Group A · Lucknow';
+  document.querySelector('.profile-avatar').textContent=acc.init;
+}
+
+document.getElementById('wCodeInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('wPassInput').focus();});
+document.getElementById('wPassInput').addEventListener('keydown',e=>{if(e.key==='Enter')doWatcherLogin();});
 </script>
+</div><!-- close wAppShell -->
 </body>
 </html>
