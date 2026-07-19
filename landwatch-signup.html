@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch — Register</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F4F0;--surface:#FFF;--border:#E6E4DE;--text:#181815;--sub:#82807A;--accent:#2B6651;--accent-light:#E8F2ED;--gold:#8A6F2E;--gold-light:#FDF6E3;--r:14px;--sh:0 2px 10px rgba(0,0,0,.055);}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--accent);}
+.logo span{color:var(--text);}
+.login-link{font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;background:var(--accent-light);padding:6px 14px;border-radius:8px;}
+main{max-width:480px;margin:0 auto;padding:20px 14px 60px;display:flex;flex-direction:column;gap:16px;}
+.stepper{display:flex;align-items:center;gap:0;margin-bottom:4px;}
+.step{display:flex;align-items:center;gap:6px;flex:1;}
+.step-circle{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--sub);flex-shrink:0;transition:all .2s;}
+.step-circle.active{border-color:var(--accent);background:var(--accent);color:#fff;}
+.step-circle.done{border-color:var(--accent);background:var(--accent-light);color:var(--accent);}
+.step-label{font-size:11px;font-weight:600;color:var(--sub);white-space:nowrap;}
+.step-label.active{color:var(--accent);}
+.step-line{flex:1;height:2px;background:var(--border);margin:0 6px;}
+.step-line.done{background:var(--accent);}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
+.card-head{padding:16px 18px 14px;border-bottom:1px solid var(--border);}
+.card-title{font-family:'DM Serif Display',serif;font-size:20px;}
+.card-sub{font-size:13px;color:var(--sub);margin-top:3px;}
+.form-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+.field-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.field-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;}
+.field-input:focus{border-color:var(--accent);}
+.field-wrap{display:flex;flex-direction:column;}
+.plan-grid{padding:14px;display:flex;flex-direction:column;gap:10px;}
+.plan-card{border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .18s;position:relative;}
+.plan-card.selected{border-color:var(--accent);background:var(--accent-light);}
+.plan-card.gold-card.selected{border-color:var(--gold);background:var(--gold-light);}
+.best-badge{position:absolute;top:12px;right:12px;background:var(--gold);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.sel-badge{position:absolute;top:12px;right:12px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.gold-card .sel-badge{background:var(--gold);}
+.plan-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.plan-icon{font-size:24px;}
+.plan-name{font-size:16px;font-weight:700;}
+.plan-price-tag{font-size:13px;color:var(--sub);margin-top:1px;}
+.plan-features{list-style:none;}
+.plan-features li{font-size:13px;color:var(--sub);padding:3px 0;display:flex;align-items:center;gap:7px;}
+.plan-features li::before{content:"✓";color:var(--accent);font-weight:700;}
+.gold-card .plan-features li::before{color:var(--gold);}
+.pay-summary{background:var(--bg);border-radius:10px;padding:14px 16px;margin-bottom:14px;border:1px solid var(--border);}
+.pay-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
+.pay-row.total{font-weight:700;font-size:15px;border-top:1px solid var(--border);padding-top:10px;margin-top:6px;}
+.pay-methods{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.pay-method{border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s;}
+.pay-method.selected-pay{border-color:var(--accent);background:var(--accent-light);}
+.pay-icon{font-size:20px;}
+.pay-label{font-size:14px;font-weight:600;}
+.pay-sub-txt{font-size:11px;color:var(--sub);}
+.pay-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);margin-left:auto;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pay-radio.checked{border-color:var(--accent);}
+.pay-radio.checked::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent);}
+.success-screen{padding:32px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.success-icon{font-size:56px;}
+.success-title{font-family:'DM Serif Display',serif;font-size:26px;}
+.success-sub{font-size:14px;color:var(--sub);line-height:1.6;}
+.code-box{background:var(--accent-light);border:1.5px solid var(--accent);border-radius:12px;padding:20px 24px;width:100%;}
+.code-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.code-value{font-family:'DM Serif Display',serif;font-size:32px;color:var(--accent);letter-spacing:2px;}
+.code-hint{font-size:12px;color:var(--sub);margin-top:6px;}
+.plan-summary-pill{display:inline-flex;align-items:center;gap:6px;background:var(--gold-light);border:1px solid var(--gold);color:var(--gold);font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;}
+.btn-primary{width:100%;padding:14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-secondary{width:100%;padding:12px;border-radius:10px;background:var(--bg);color:var(--sub);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;}
+.btn-back{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;margin-bottom:4px;}
+.btn-row{padding:0 18px 18px;display:flex;flex-direction:column;gap:8px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:900;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">Land<span>Watch</span></div>
+  <div class="login-link" onclick="window.location.href='landwatch-client.html'">Login →</div>
+</div>
+<main id="mainContent"></main>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDocs, collection, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCO_3ZIXLJGehvcIeZZqTm1tZTFm0NGtIE",
+  authDomain: "landwatch-f8bf6.firebaseapp.com",
+  databaseURL: "https://landwatch-f8bf6-default-rtdb.firebaseio.com",
+  projectId: "landwatch-f8bf6",
+  storageBucket: "landwatch-f8bf6.firebasestorage.app",
+  messagingSenderId: "37024480482",
+  appId: "1:37024480482:web:a8d07998738b34db02b2bb"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const planInfo = {
+  normal:{key:'normal',name:'Normal',icon:'🌱',price:499,features:['Daily photos'],best:false},
+  pro:{key:'pro',name:'Pro',icon:'⭐',price:999,features:['Daily photos','Alert with consultant','Up to 2 properties'],best:false},
+  promax:{key:'promax',name:'Pro Max',icon:'🚀',price:1999,features:['Daily photos','Alert with consultant','Live camera','Up to 5 properties'],best:true},
+};
+
+let state = { step:1, form:{name:'',phone:'',email:'',password:'',address:''}, selectedPlan:null, selectedPayment:null, generatedCode:null };
+
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
+
+function stepperHTML(current){
+  const steps=[{n:1,l:'Details'},{n:2,l:'Plan'},{n:3,l:'Payment'},{n:4,l:'Done'}];
+  return `<div class="stepper">${steps.map((s,i)=>`
+    <div class="step">
+      <div class="step-circle ${current>s.n?'done':current===s.n?'active':''}">${current>s.n?'✓':s.n}</div>
+      <div class="step-label ${current===s.n?'active':''}">${s.l}</div>
+    </div>${i<steps.length-1?`<div class="step-line ${current>s.n?'done':''}"></div>`:''}`).join('')}</div>`;
+}
+
+// ── STEP 1 ──
+function renderStep1(){
+  document.getElementById('mainContent').innerHTML=`
+    ${stepperHTML(1)}
+    <div class="card">
+      <div class="card-head"><div class="card-title">Create your account</div><div class="card-sub">We'll set up your LandWatch profile</div></div>
+      <div class="form-body">
+        <div class="field-wrap"><div class="field-label">Full Name</div><input class="field-input" id="f_name" placeholder="e.g. Arpit Mishra" value="${state.form.name}"></div>
+        <div class="field-wrap"><div class="field-label">Phone Number</div><input class="field-input" id="f_phone" type="tel" placeholder="10-digit mobile" value="${state.form.phone}" maxlength="10"></div>
+        <div class="field-wrap"><div class="field-label">Email</div><input class="field-input" id="f_email" type="email" placeholder="you@email.com" value="${state.form.email}"></div>
+        <div class="field-wrap"><div class="field-label">Password</div><input class="field-input" id="f_password" type="password" placeholder="Min 6 characters" value="${state.form.password}"></div>
+        <div class="field-wrap"><div class="field-label">City / Area</div><input class="field-input" id="f_address" placeholder="e.g. Lucknow, UP" value="${state.form.address}"></div>
+      </div>
+      <div class="btn-row"><button class="btn-primary" onclick="submitStep1()">Continue →</button></div>
+    </div>`;
+}
+
+window.submitStep1 = function(){
+  const name=document.getElementById('f_name').value.trim();
+  const phone=document.getElementById('f_phone').value.trim();
+  const email=document.getElementById('f_email').value.trim();
+  const password=document.getElementById('f_password').value.trim();
+  const address=document.getElementById('f_address').value.trim();
+  if(!name){showToast('⚠️ Enter your name');return;}
+  if(phone.length!==10||isNaN(phone)){showToast('⚠️ Valid 10-digit phone');return;}
+  if(!email.includes('@')){showToast('⚠️ Valid email required');return;}
+  if(password.length<6){showToast('⚠️ Password min 6 characters');return;}
+  if(!address){showToast('⚠️ Enter your city');return;}
+  state.form={name,phone,email,password,address};
+  state.step=2; renderStep2();
+};
+
+// ── STEP 2 ──
+function renderStep2(){
+  document.getElementById('mainContent').innerHTML=`
+    ${stepperHTML(2)}
+    <button class="btn-back" onclick="state.step=1;renderStep1()">← Back</button>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Choose your plan</div><div class="card-sub">Upgrade anytime</div></div>
+      <div class="plan-grid">
+        ${Object.values(planInfo).map(p=>`
+          <div class="plan-card ${p.best?'gold-card':''} ${state.selectedPlan===p.key?'selected':''}" onclick="selectPlan('${p.key}')">
+            ${p.best&&state.selectedPlan!==p.key?'<div class="best-badge">Best</div>':''}
+            ${state.selectedPlan===p.key?'<div class="sel-badge">Selected ✓</div>':''}
+            <div class="plan-top"><div class="plan-icon">${p.icon}</div><div><div class="plan-name">${p.name}</div><div class="plan-price-tag">₹${p.price.toLocaleString('en-IN')}/month</div></div></div>
+            <ul class="plan-features">${p.features.map(f=>'<li>'+f+'</li>').join('')}</ul>
+          </div>`).join('')}
+      </div>
+      <div class="btn-row"><button class="btn-primary" onclick="submitStep2()" ${!state.selectedPlan?'disabled':''}>Continue →</button></div>
+    </div>`;
+}
+
+window.selectPlan = function(key){ state.selectedPlan=key; renderStep2(); };
+window.submitStep2 = function(){ if(!state.selectedPlan){showToast('⚠️ Select a plan');return;} state.step=3; renderStep3(); };
+
+// ── STEP 3 ──
+function renderStep3(){
+  const plan=planInfo[state.selectedPlan];
+  document.getElementById('mainContent').innerHTML=`
+    ${stepperHTML(3)}
+    <button class="btn-back" onclick="state.step=2;renderStep2()">← Back</button>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Payment</div><div class="card-sub">Secure checkout</div></div>
+      <div class="form-body">
+        <div class="pay-summary">
+          <div class="pay-row"><span>Plan</span><span>${plan.name}</span></div>
+          <div class="pay-row"><span>Name</span><span>${state.form.name}</span></div>
+          <div class="pay-row"><span>Email</span><span>${state.form.email}</span></div>
+          <div class="pay-row total"><span>Total</span><span>₹${plan.price.toLocaleString('en-IN')}/mo</span></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Payment Method</div>
+        <div class="pay-methods">
+          ${[{key:'upi',icon:'📱',label:'UPI',sub:'Google Pay, PhonePe, Paytm'},{key:'card',icon:'💳',label:'Credit / Debit Card',sub:'Visa, Mastercard, RuPay'},{key:'netbank',icon:'🏦',label:'Net Banking',sub:'All major banks'}].map(m=>`
+            <div class="pay-method ${state.selectedPayment===m.key?'selected-pay':''}" onclick="selectPayment('${m.key}')">
+              <div class="pay-icon">${m.icon}</div>
+              <div><div class="pay-label">${m.label}</div><div class="pay-sub-txt">${m.sub}</div></div>
+              <div class="pay-radio ${state.selectedPayment===m.key?'checked':''}"></div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="btn-row"><button class="btn-primary" id="payBtn" onclick="submitStep3()" ${!state.selectedPayment?'disabled':''}>Pay ₹${plan.price.toLocaleString('en-IN')} →</button></div>
+    </div>`;
+}
+
+window.selectPayment = function(key){ state.selectedPayment=key; renderStep3(); };
+
+window.submitStep3 = async function(){
+  if(!state.selectedPayment){showToast('⚠️ Select payment method');return;}
+  const btn=document.getElementById('payBtn');
+  btn.innerHTML='<span class="spinner"></span> Processing…'; btn.disabled=true;
+  try {
+    // 1. Create Firebase Auth user
+    const cred = await createUserWithEmailAndPassword(auth, state.form.email, state.form.password);
+    // 2. Generate client code
+    // Generate unique code using timestamp to avoid duplicates
+    const snap = await getDocs(collection(db, 'clients'));
+    const existingCodes = snap.docs.map(d => d.id);
+    let num = snap.size + 1;
+    let candidate = 'LW-' + String(num).padStart(3, '0');
+    // Keep incrementing until we find a code that doesn't exist
+    while (existingCodes.includes(candidate)) {
+      num++;
+      candidate = 'LW-' + String(num).padStart(3, '0');
+    }
+    state.generatedCode = candidate;
+    // 3. Save to Firestore
+    await setDoc(doc(db, 'clients', state.generatedCode), {
+      uid: cred.user.uid,
+      code: state.generatedCode,
+      name: state.form.name,
+      phone: state.form.phone,
+      email: state.form.email,
+      address: state.form.address,
+      plan: state.selectedPlan,
+      init: state.form.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(),
+      properties: [{ label: state.form.address + ' — Property 1', camera: false }],
+      alerts: [],
+      assignedWatcherGroup: 'groupA',
+      createdAt: serverTimestamp(),
+    });
+    state.step=4; renderStep4();
+  } catch(e) {
+    if(e.code==='auth/email-already-in-use') showToast('⚠️ Email already registered. Login instead.');
+    else showToast('⚠️ ' + e.message);
+    btn.innerHTML='Pay ₹'+planInfo[state.selectedPlan].price.toLocaleString('en-IN')+' →'; btn.disabled=false;
+  }
+};
+
+// ── STEP 4 ──
+function renderStep4(){
+  const plan=planInfo[state.selectedPlan];
+  document.getElementById('mainContent').innerHTML=`
+    ${stepperHTML(4)}
+    <div class="card">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Welcome to LandWatch!</div>
+        <div class="success-sub">Account created successfully. Use your email and code to log in.</div>
+        <div class="code-box">
+          <div class="code-label">Your Login Code</div>
+          <div class="code-value">${state.generatedCode}</div>
+          <div class="code-hint">Use this code + your email to login anytime on any device.</div>
+        </div>
+        <div class="plan-summary-pill">${plan.icon} ${plan.name} · ₹${plan.price.toLocaleString('en-IN')}/mo</div>
+        <div style="font-size:12px;color:var(--sub);text-align:center;line-height:1.8;">
+          Name: <b>${state.form.name}</b><br>
+          Email: ${state.form.email}<br>
+          City: ${state.form.address}
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="window.location.href='landwatch-client.html'">Go to Login →</button>
+        <button class="btn-secondary" onclick="resetSignup()">Register Another</button>
+      </div>
+    </div>`;
+}
+
+window.resetSignup = function(){
+  state={step:1,form:{name:'',phone:'',email:'',password:'',address:''},selectedPlan:null,selectedPayment:null,generatedCode:null};
+  renderStep1();
+};
+
+renderStep1();
+</script>
+</body>
+</html>

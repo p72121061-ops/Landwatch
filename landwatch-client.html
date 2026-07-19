@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch — Client</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F4F0;--surface:#FFF;--border:#E6E4DE;--text:#181815;--sub:#82807A;--accent:#2B6651;--accent-light:#E8F2ED;--alert:#B83232;--alert-light:#FDECEA;--gold:#8A6F2E;--gold-light:#FDF6E3;--r:14px;--sh:0 2px 10px rgba(0,0,0,.055);}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+.login-logo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--accent);margin-bottom:6px;}
+.login-logo span{color:var(--text);}
+.login-sub{font-size:13px;color:var(--sub);margin-bottom:32px;}
+.login-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;align-self:flex-start;width:100%;max-width:360px;}
+.login-input{width:100%;max-width:360px;border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--surface);outline:none;margin-bottom:12px;}
+.login-input:focus{border-color:var(--accent);}
+.login-btn{width:100%;max-width:360px;padding:14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;}
+.signup-link{font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;margin-top:16px;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.hamburger{width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-size:16px;}
+.logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--accent);}
+.logo span{color:var(--text);}
+.client-badge{background:var(--gold);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:400;}
+.drawer-overlay.open{display:block;}
+.drawer{position:fixed;top:0;left:-280px;width:280px;height:100%;background:var(--surface);z-index:500;transition:left .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+.drawer.open{left:0;}
+.drawer-head{padding:20px;border-bottom:1px solid var(--border);}
+.drawer-name{font-family:'DM Serif Display',serif;font-size:18px;}
+.drawer-plan{font-size:11px;font-weight:700;margin-top:4px;padding:3px 9px;border-radius:20px;display:inline-block;}
+.drawer-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:13px 20px;font-size:14px;font-weight:500;cursor:pointer;transition:background .12s;}
+.drawer-item:hover{background:var(--bg);}
+.drawer-item .di{font-size:16px;width:20px;text-align:center;}
+.drawer-section{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.8px;text-transform:uppercase;padding:14px 20px 4px;}
+.drawer-close{padding:16px 20px;border-top:1px solid var(--border);}
+.drawer-close button{width:100%;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--sub);cursor:pointer;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:200;max-width:480px;margin:0 auto;}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 14px;gap:3px;cursor:pointer;color:var(--sub);font-size:10px;font-weight:500;border:none;background:none;}
+.bn-item.active{color:var(--accent);}
+.bn-icon{font-size:19px;}
+main{max-width:480px;margin:0 auto;padding:16px 14px 100px;display:flex;flex-direction:column;gap:14px;}
+.profile-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:18px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh);}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:20px;color:var(--gold);flex-shrink:0;}
+.profile-name{font-family:'DM Serif Display',serif;font-size:18px;}
+.profile-sub{font-size:12px;color:var(--sub);margin-top:2px;}
+.profile-stats{display:flex;gap:16px;margin-top:10px;}
+.pstat-val{font-size:16px;font-weight:700;color:var(--accent);}
+.pstat-lbl{font-size:10px;color:var(--sub);margin-top:1px;}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
+.card-head{padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.card-title{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;}
+.card-action{font-size:12px;color:var(--accent);font-weight:600;cursor:pointer;}
+.alert-banner{border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;}
+.alert-banner.clear{background:var(--accent-light);color:var(--accent);}
+.alert-banner.active{background:var(--alert-light);color:var(--alert);}
+.ab-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.clear .ab-dot{background:var(--accent);}
+.active .ab-dot{background:var(--alert);animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.prop-selector{padding:12px 16px;border-bottom:1px solid var(--border);}
+.prop-select{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;cursor:pointer;}
+.photo-grid{padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.photo-thumb{aspect-ratio:1;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;overflow:hidden;position:relative;}
+.photo-thumb.today{border-color:var(--accent);background:var(--accent-light);}
+.pt-icon{font-size:20px;}
+.pt-date{font-size:10px;color:var(--sub);text-align:center;line-height:1.3;}
+.photo-thumb.today .pt-date{color:var(--accent);}
+.view-all{margin:0 12px 12px;width:calc(100% - 24px);padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--sub);cursor:pointer;}
+.camera-box{padding:14px;}
+.camera-live{background:#0e0e0e;border-radius:10px;aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;position:relative;}
+.live-badge{position:absolute;top:10px;left:10px;background:#e74c3c;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;display:flex;align-items:center;gap:4px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1s infinite;}
+.upgrade-box{border:1.5px dashed var(--border);border-radius:10px;padding:22px;text-align:center;}
+.upgrade-icon{font-size:30px;margin-bottom:8px;}
+.upgrade-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.upgrade-sub{font-size:12px;color:var(--sub);margin-bottom:14px;line-height:1.5;}
+.upgrade-btn{background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.watcher-row{display:flex;align-items:center;padding:11px 16px;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.watcher-row:last-child{border-bottom:none;}
+.watcher-row:hover{background:var(--bg);}
+.wav{width:38px;height:38px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0;}
+.w-name{font-size:14px;font-weight:500;flex:1;}
+.w-role{font-size:11px;color:var(--sub);}
+.call-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;}
+.alert-row{padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.alert-row:last-child{border-bottom:none;}
+.alert-row:hover{background:var(--bg);}
+.alert-row-top{display:flex;align-items:center;gap:8px;}
+.alert-dot-r{width:8px;height:8px;border-radius:50%;background:var(--alert);flex-shrink:0;animation:pulse 1.4s infinite;}
+.alert-prop{font-size:13px;font-weight:600;flex:1;}
+.alert-time-s{font-size:11px;color:var(--sub);}
+.alert-preview{font-size:12px;color:var(--sub);margin-top:4px;padding-left:16px;line-height:1.4;}
+.plan-grid{display:flex;flex-direction:column;gap:10px;padding:14px;}
+.plan-card{border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;}
+.plan-card.current{border-color:var(--accent);background:var(--accent-light);}
+.plan-card.gold-plan{border-color:var(--gold);background:var(--gold-light);}
+.current-badge{position:absolute;top:12px;right:12px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.gold-badge{position:absolute;top:12px;right:12px;background:var(--gold);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.plan-name{font-size:16px;font-weight:700;margin-bottom:10px;}
+.plan-features{list-style:none;}
+.plan-features li{font-size:13px;color:var(--sub);padding:3px 0;display:flex;align-items:center;gap:7px;}
+.plan-features li::before{content:"✓";color:var(--accent);font-weight:700;}
+.gold-plan .plan-features li::before{color:var(--gold);}
+.plan-price{font-size:13px;font-weight:600;color:var(--accent);margin-top:12px;}
+.gold-plan .plan-price{color:var(--gold);}
+.upgrade-plan-btn{margin-top:12px;width:100%;padding:10px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.gold-plan .upgrade-plan-btn{background:var(--gold);}
+.stat-strip{display:flex;padding:14px 16px;border-bottom:1px solid var(--border);}
+.stat-cell{flex:1;text-align:center;border-right:1px solid var(--border);}
+.stat-cell:last-child{border-right:none;}
+.stat-val{font-size:20px;font-weight:700;color:var(--accent);}
+.stat-lbl{font-size:10px;color:var(--sub);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:900;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:700;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:18px 22px 36px;width:100%;max-width:480px;animation:slideUp .22s ease;max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:14px;}
+.modal-av{width:54px;height:54px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--accent);font-family:'DM Serif Display',serif;margin:0 auto 10px;}
+.modal-nm{font-size:17px;font-weight:600;text-align:center;}
+.modal-rl{font-size:12px;color:var(--sub);text-align:center;margin-bottom:20px;}
+.modal-row{display:flex;gap:10px;margin-top:4px;}
+.mbtn{flex:1;padding:12px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.mbtn.primary{background:var(--accent);color:#fff;}
+.mbtn.secondary{background:var(--bg);color:var(--sub);border:1px solid var(--border);}
+.mbtn:hover{opacity:.84;}
+.alert-detail-box{background:var(--alert-light);border:1px solid #f5c6c2;border-radius:8px;padding:12px;margin-bottom:14px;}
+.adb-msg{font-size:13px;color:var(--alert);font-weight:500;}
+.adb-time{font-size:11px;color:var(--sub);margin-top:4px;}
+.call-option{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
+.call-option:hover{background:var(--accent-light);border-color:var(--accent);}
+.call-option-icon{font-size:22px;}
+.call-option-label{font-size:14px;font-weight:600;}
+.call-option-sub{font-size:12px;color:var(--sub);margin-top:2px;}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-logo">Land<span>Watch</span></div>
+  <div class="login-sub">Your land. Always watched.</div>
+  <div class="login-label">Email</div>
+  <input class="login-input" type="email" id="loginEmail" placeholder="you@email.com">
+  <div class="login-label">Password</div>
+  <input class="login-input" type="password" id="loginPassword" placeholder="Your password">
+  <div class="login-label">Client Code</div>
+  <input class="login-input" type="text" id="loginCode" placeholder="e.g. LW-001" style="text-transform:uppercase;" onkeydown="if(event.key==='Enter')doLogin()">
+  <button class="login-btn" id="loginBtn" onclick="doLogin()">Continue →</button>
+  <div style="font-size:12px;color:var(--sub);margin-top:16px;text-align:center;line-height:1.8;">
+    Signup karo → code milega → yahan login karo
+  </div>
+  <div class="signup-link" onclick="window.location.href='landwatch-signup.html'">New user? Register here →</div>
+</div>
+
+<div id="appShell" style="display:none;">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openDrawer()">☰</div>
+      <div class="logo">Land<span>Watch</span></div>
+    </div>
+    <div class="client-badge">Client</div>
+  </div>
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-head">
+      <div class="drawer-name" id="drawerName"></div>
+      <div class="drawer-plan" id="drawerPlan"></div>
+    </div>
+    <div class="drawer-nav">
+      <div class="drawer-section">Navigation</div>
+      <div class="drawer-item" onclick="switchTab('dashboard');closeDrawer()"><span class="di">📊</span>Dashboard</div>
+      <div class="drawer-item" onclick="switchTab('watchers');closeDrawer()"><span class="di">👥</span>My Watch Group</div>
+      <div class="drawer-item" onclick="switchTab('alerts');closeDrawer()"><span class="di">🚨</span>Alerts</div>
+      <div class="drawer-item" onclick="switchTab('plans');closeDrawer()"><span class="di">📋</span>Plans</div>
+      <div class="drawer-section">Account</div>
+      <div class="drawer-item" onclick="doLogout()"><span class="di">🚪</span>Logout</div>
+    </div>
+    <div class="drawer-close"><button onclick="closeDrawer()">Close</button></div>
+  </div>
+  <main>
+    <div id="tab-dashboard" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="profile-card">
+        <div class="profile-avatar" id="profileAv"></div>
+        <div>
+          <div class="profile-name" id="profileName"></div>
+          <div class="profile-sub" id="profileSub"></div>
+          <div class="profile-stats">
+            <div><div class="pstat-val" id="propCount">—</div><div class="pstat-lbl">Properties</div></div>
+            <div><div class="pstat-val">5</div><div class="pstat-lbl">Watchers</div></div>
+            <div><div class="pstat-val" id="planLabel">—</div><div class="pstat-lbl">Plan</div></div>
+          </div>
+        </div>
+      </div>
+      <div id="alertBanner" class="alert-banner clear"><div class="ab-dot"></div><span id="alertBannerText">All clear — no alerts today</span></div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>🏡</span>Your Properties</div></div>
+        <div class="prop-selector"><select class="prop-select" id="propSelect" onchange="renderCamera()"></select></div>
+        <div class="card-head" style="border-top:1px solid var(--border);"><div class="card-title"><span>📸</span>Daily Photos</div></div>
+        <div class="photo-grid" id="photoGrid"></div>
+        <button class="view-all" onclick="showToast('📂 Opening full gallery…')">View all photos →</button>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>📹</span>Live Camera</div></div>
+        <div class="camera-box" id="cameraBox"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>📅</span>This Month</div></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="stat-val" id="photoCount">0</div><div class="stat-lbl">Photos</div></div>
+          <div class="stat-cell"><div class="stat-val" id="alertStatCount">0</div><div class="stat-lbl">Alerts</div></div>
+          <div class="stat-cell"><div class="stat-val" id="visitCount">0</div><div class="stat-lbl">Visits</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-watchers" style="display:none;flex-direction:column;gap:14px;">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>👥</span>Your Watch Group</div></div>
+        <div id="watcherList"></div>
+      </div>
+    </div>
+    <div id="tab-alerts" style="display:none;flex-direction:column;gap:14px;">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>🚨</span>Alerts</div><div class="card-action" id="alertTabCount">0 active</div></div>
+        <div id="alertListEl"></div>
+      </div>
+    </div>
+    <div id="tab-plans" style="display:none;flex-direction:column;gap:14px;">
+      <div style="font-size:13px;color:var(--sub);padding:4px 2px;">Your current plan and upgrades.</div>
+      <div class="plan-grid" id="planGrid"></div>
+    </div>
+  </main>
+  <div class="bottom-nav">
+    <button class="bn-item active" id="bn-dashboard" onclick="switchTab('dashboard')"><span class="bn-icon">📊</span>Dashboard</button>
+    <button class="bn-item" id="bn-watchers" onclick="switchTab('watchers')"><span class="bn-icon">👥</span>Watchers</button>
+    <button class="bn-item" id="bn-alerts" onclick="switchTab('alerts')"><span class="bn-icon">🚨</span>Alerts</button>
+    <button class="bn-item" id="bn-plans" onclick="switchTab('plans')"><span class="bn-icon">📋</span>Plans</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="callModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal"><div class="modal-handle"></div>
+    <div class="modal-av" id="callAv"></div><div class="modal-nm" id="callName"></div><div class="modal-rl" id="callRole"></div>
+    <div class="modal-row">
+      <button class="mbtn primary" id="callNowBtn">📞 Call Now</button>
+      <button class="mbtn secondary" onclick="closeModal('callModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="alertDetailModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal"><div class="modal-handle"></div>
+    <div class="modal-title">🚨 Alert</div>
+    <div class="alert-detail-box"><div class="adb-msg" id="adMsg"></div><div class="adb-time" id="adTime"></div></div>
+    <div class="call-option" onclick="showToast('📞 Calling…');closeModal('alertDetailModal')"><div class="call-option-icon">📞</div><div><div class="call-option-label">Call Watcher</div><div class="call-option-sub">Speak to your group leader</div></div></div>
+    <div class="call-option" onclick="showToast('👥 Group call started');closeModal('alertDetailModal')"><div class="call-option-icon">👥</div><div><div class="call-option-label">Group Call — With Watchers</div><div class="call-option-sub">You + full team on call</div></div></div>
+    <div class="call-option" onclick="showToast('🛡️ Watchers notified');closeModal('alertDetailModal')"><div class="call-option-icon">🛡️</div><div><div class="call-option-label">Let Watchers Handle It</div><div class="call-option-sub">Team acts and updates you</div></div></div>
+    <button class="mbtn secondary" style="width:100%;margin-top:8px;" onclick="closeModal('alertDetailModal')">Close</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="photoModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal"><div class="modal-handle"></div>
+    <img id="photoModalImg" style="width:100%;border-radius:10px;margin-bottom:10px;" src="">
+    <div id="photoModalMeta" style="font-size:12px;color:var(--accent);font-weight:500;text-align:center;margin-bottom:14px;"></div>
+    <button class="mbtn secondary" style="width:100%;" onclick="closeModal('photoModal')">Close</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCO_3ZIXLJGehvcIeZZqTm1tZTFm0NGtIE",
+  authDomain: "landwatch-f8bf6.firebaseapp.com",
+  databaseURL: "https://landwatch-f8bf6-default-rtdb.firebaseio.com",
+  projectId: "landwatch-f8bf6",
+  storageBucket: "landwatch-f8bf6.firebasestorage.app",
+  messagingSenderId: "37024480482",
+  appId: "1:37024480482:web:a8d07998738b34db02b2bb"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const rtdb = getDatabase(app);
+
+const planInfo = {
+  normal:{label:'Normal',cls:'plan-normal',features:['Daily photos'],price:'₹499/month'},
+  pro:{label:'Pro',cls:'plan-pro',features:['Daily photos','Alert with consultant','Up to 2 properties'],price:'₹999/month'},
+  promax:{label:'Pro Max',cls:'plan-promax',features:['Daily photos','Alert with consultant','Live camera','Up to 5 properties'],price:'₹1,999/month'},
+};
+const planOrder = ['normal','pro','promax'];
+
+let currentUser = null;
+let currentClientData = null;
+let alertsUnsub = null;
+let photosUnsub = null;
+
+// ── LOGIN ──
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  const code = document.getElementById('loginCode').value.trim().toUpperCase();
+  if (!email) { showToast('⚠️ Enter your email'); return; }
+  if (!password) { showToast('⚠️ Enter your password'); return; }
+  if (!code) { showToast('⚠️ Enter your client code'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.innerHTML = '<span class="spinner"></span>'; btn.disabled = true;
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const clientDoc = await getDoc(doc(db, 'clients', code));
+    if (!clientDoc.exists()) {
+      showToast('⚠️ Code not found');
+      await signOut(auth); btn.innerHTML='Continue →'; btn.disabled=false; return;
+    }
+    const clientData = clientDoc.data();
+    if (clientData.uid !== cred.user.uid) {
+      showToast('⚠️ Code does not match your account');
+      await signOut(auth); btn.innerHTML='Continue →'; btn.disabled=false; return;
+    }
+    currentClientData = { id: code, ...clientData };
+    initApp();
+    btn.innerHTML = 'Continue →'; btn.disabled = false;
+  } catch(e) {
+    showToast('⚠️ ' + (e.code === 'auth/invalid-credential' ? 'Wrong email or password' : e.message));
+    btn.innerHTML = 'Continue →'; btn.disabled = false;
+  }
+};
+
+document.getElementById('loginCode').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function initApp() {
+  const u = currentClientData;
+  const p = planInfo[u.plan] || planInfo.normal;
+  const init = (u.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('profileAv').textContent = init;
+  document.getElementById('profileName').textContent = u.name || '';
+  document.getElementById('profileSub').textContent = 'Code: ' + (u.code || u.id);
+  document.getElementById('propCount').textContent = (u.properties||[]).length;
+  document.getElementById('planLabel').textContent = p.label;
+  document.getElementById('drawerName').textContent = u.name || '';
+  document.getElementById('drawerPlan').textContent = p.label;
+  document.getElementById('drawerPlan').className = 'drawer-plan plan-tag ' + p.cls;
+  const sel = document.getElementById('propSelect');
+  sel.innerHTML = (u.properties||[{label:u.address||'Property 1'}]).map((pr,i) => `<option value="${i}">📍 ${pr.label||pr}</option>`).join('');
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  listenToAlerts();
+  listenToPhotos();
+  listenToRTDB();
+  switchTab('dashboard');
+}
+
+// ── REAL-TIME ALERTS ──
+function listenToAlerts() {
+  if (alertsUnsub) alertsUnsub();
+  const code = currentClientData.code || currentClientData.id;
+  const q = query(collection(db,'alerts'), where('clientCode','==',code), orderBy('createdAt','desc'));
+  alertsUnsub = onSnapshot(q, snap => {
+    const alerts = snap.docs.map(d=>({id:d.id,...d.data()}));
+    updateAlertBanner(alerts);
+    document.getElementById('alertStatCount').textContent = alerts.length;
+    document.getElementById('alertTabCount').textContent = alerts.length + ' active';
+    renderAlertList(alerts);
+    // Play sound + vibrate if new alert
+    if (snap.docChanges().some(ch => ch.type === 'added')) {
+      playAlertSound();
+    }
+  });
+}
+
+function playAlertSound() {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+  } catch(e) {}
+}
+
+// ── REAL-TIME PHOTOS ──
+function listenToPhotos() {
+  if (photosUnsub) photosUnsub();
+  const code = currentClientData.code || currentClientData.id;
+  const q = query(collection(db,'photos'), where('clientCode','==',code), orderBy('ts','desc'));
+  photosUnsub = onSnapshot(q, snap => {
+    const photos = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderPhotos(photos);
+    document.getElementById('photoCount').textContent = photos.length;
+    document.getElementById('visitCount').textContent = photos.length;
+  });
+}
+
+// ── RTDB NOTIFICATIONS ──
+function listenToRTDB() {
+  const code = currentClientData.code || currentClientData.id;
+  onValue(ref(rtdb, 'notifications/' + code + '/alerts'), snap => {
+    if (snap.exists()) {
+      playAlertSound();
+    }
+  });
+}
+
+function renderPhotos(photos) {
+  const grid = document.getElementById('photoGrid');
+  if (!photos || !photos.length) {
+    grid.innerHTML = `
+      <div class="photo-thumb today"><div class="pt-icon">⏳</div><div class="pt-date">Waiting for watcher…</div></div>
+      ${[1,2,3,4,5].map(i=>`<div class="photo-thumb"><div class="pt-icon">🖼️</div><div class="pt-date">—</div></div>`).join('')}`;
+    return;
+  }
+  window._clientPhotos = photos;
+  grid.innerHTML = photos.slice(0,6).map((p,i) => `
+    <div class="photo-thumb ${i===0?'today':''}" onclick="openPhotoModal(${i})" style="padding:0;overflow:hidden;position:relative;">
+      <img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+      <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);padding:3px 5px;font-size:9px;color:#fff;">${p.dateStr||''} · ${p.timeStr||''}</div>
+    </div>`).join('');
+}
+
+window.openPhotoModal = function(i) {
+  const p = (window._clientPhotos||[])[i]; if(!p) return;
+  document.getElementById('photoModalImg').src = p.image;
+  document.getElementById('photoModalMeta').textContent = (p.dateStr||'') + ' · ' + (p.timeStr||'') + (p.gps ? ' · GPS: '+p.gps.lat+', '+p.gps.lng : '');
+  document.getElementById('photoModal').classList.add('open');
+};
+
+function updateAlertBanner(alerts) {
+  const banner = document.getElementById('alertBanner');
+  const txt = document.getElementById('alertBannerText');
+  if (alerts.length) { banner.className='alert-banner active'; txt.textContent='⚠️ '+alerts.length+' active alert — check Alerts tab'; }
+  else { banner.className='alert-banner clear'; txt.textContent='All clear — no alerts today'; }
+}
+
+function renderAlertList(alerts) {
+  const el = document.getElementById('alertListEl');
+  if (!alerts.length) { el.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:var(--accent);">✅ No alerts</div>'; return; }
+  el.innerHTML = alerts.map((a,i) => `
+    <div class="alert-row" onclick="openAlertDetail(${i})">
+      <div class="alert-row-top"><div class="alert-dot-r"></div><div class="alert-prop">Property Alert</div><div class="alert-time-s">${(a.timeStr||'').split('·')[0]}</div></div>
+      <div class="alert-preview">${(a.msg||'').substring(0,70)}…</div>
+    </div>`).join('');
+  window._clientAlerts = alerts;
+}
+
+window.openAlertDetail = function(i) {
+  const a = (window._clientAlerts||[])[i]; if(!a) return;
+  document.getElementById('adMsg').textContent = a.msg||'';
+  document.getElementById('adTime').textContent = (a.timeStr||'') + ' · ' + (a.watcherName||'');
+  document.getElementById('alertDetailModal').classList.add('open');
+};
+
+function renderCamera() {
+  const idx = parseInt(document.getElementById('propSelect').value||0);
+  const props = currentClientData.properties||[];
+  const prop = props[idx]||{};
+  const hasCam = prop.camera && currentClientData.plan==='promax';
+  document.getElementById('cameraBox').innerHTML = hasCam ? `
+    <div class="camera-live">
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div style="font-size:36px;opacity:.4;">📡</div>
+      <div style="font-size:12px;opacity:.5;margin-top:6px;">Connecting…</div>
+    </div>` : currentClientData.plan!=='promax' ? `
+    <div class="upgrade-box"><div class="upgrade-icon">📹</div><div class="upgrade-title">Not in your plan</div><div class="upgrade-sub">Upgrade to Pro Max for live camera.</div><button class="upgrade-btn" onclick="switchTab('plans')">See Plans →</button></div>` : `
+    <div class="upgrade-box"><div class="upgrade-icon">📹</div><div class="upgrade-title">No camera on this property</div><div class="upgrade-sub">Contact your group to add a camera.</div><button class="upgrade-btn" onclick="showToast('📞 Contacting…')">Contact Group</button></div>`;
+}
+
+function renderWatchers() {
+  const demo = [{name:'Virat Kohli',init:'VK',role:'Group Leader'},{name:'Rohit Sharma',init:'RS',role:'Senior Watcher'},{name:'MS Dhoni',init:'MD',role:'Field Scout'},{name:'Hardik Pandya',init:'HP',role:'Field Scout'},{name:'Rahul Verma',init:'RV',role:'Senior Watcher'}];
+  document.getElementById('watcherList').innerHTML = demo.map(w=>`
+    <div class="watcher-row" onclick="openCallModal('${w.init}','${w.name}','${w.role}','')">
+      <div class="wav">${w.init}</div>
+      <div style="flex:1"><div class="w-name">${w.name}</div><div class="w-role">${w.role}</div></div>
+      <div class="call-chip">📞 Call</div>
+    </div>`).join('');
+}
+
+function renderPlans() {
+  const current = currentClientData.plan||'normal';
+  const currentIdx = planOrder.indexOf(current);
+  document.getElementById('planGrid').innerHTML = planOrder.map((pk,i) => {
+    const p = planInfo[pk]; const isCurrent = pk===current; const isUpgrade = i>currentIdx;
+    return `<div class="plan-card ${isCurrent?'current':''} ${pk==='promax'&&isUpgrade?'gold-plan':''}">
+      ${isCurrent?'<div class="current-badge">Current</div>':''}
+      ${pk==='promax'&&isUpgrade?'<div class="gold-badge">Best</div>':''}
+      <div class="plan-name">${p.label}</div>
+      <ul class="plan-features">${p.features.map(f=>'<li>'+f+'</li>').join('')}</ul>
+      <div class="plan-price">${p.price}</div>
+      ${isUpgrade?`<button class="upgrade-plan-btn" onclick="showToast('Upgrading…')">Upgrade to ${p.label}</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+const tabs = ['dashboard','watchers','alerts','plans'];
+window.switchTab = function(tab) {
+  tabs.forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if(el){el.style.display=t===tab?'flex':'none';el.style.flexDirection='column';}
+    const bn = document.getElementById('bn-'+t);
+    if(bn) bn.classList.toggle('active',t===tab);
+  });
+  if(tab==='watchers') renderWatchers();
+  if(tab==='plans') renderPlans();
+  if(tab==='dashboard') renderCamera();
+};
+
+window.doLogout = async function() {
+  if(alertsUnsub) alertsUnsub();
+  if(photosUnsub) photosUnsub();
+  await signOut(auth);
+  currentClientData = null;
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginEmail').value='';
+  document.getElementById('loginCode').value='';
+};
+
+window.openCallModal = function(init,name,role,phone) {
+  document.getElementById('callAv').textContent=init;
+  document.getElementById('callName').textContent=name;
+  document.getElementById('callRole').textContent=role;
+  document.getElementById('callNowBtn').onclick = phone ? ()=>window.location.href='tel:'+phone : ()=>showToast('No number saved');
+  document.getElementById('callModal').classList.add('open');
+};
+
+window.openDrawer = ()=>{document.getElementById('drawer').classList.add('open');document.getElementById('drawerOverlay').classList.add('open');};
+window.closeDrawer = ()=>{document.getElementById('drawer').classList.remove('open');document.getElementById('drawerOverlay').classList.remove('open');};
+window.closeModal = id=>document.getElementById(id).classList.remove('open');
+window.showToast = function(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);};
+</script>
+</body>
+</html>
