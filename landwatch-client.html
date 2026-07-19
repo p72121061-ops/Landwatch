@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch — Client</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F4F0;--surface:#FFF;--border:#E6E4DE;--text:#181815;--sub:#82807A;
+  --accent:#2B6651;--accent-light:#E8F2ED;--alert:#B83232;--alert-light:#FDECEA;
+  --gold:#8A6F2E;--gold-light:#FDF6E3;--r:14px;--sh:0 2px 10px rgba(0,0,0,.055);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+.login-logo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--accent);margin-bottom:6px;}
+.login-logo span{color:var(--text);}
+.login-sub{font-size:13px;color:var(--sub);margin-bottom:36px;}
+.login-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;align-self:flex-start;width:100%;max-width:360px;}
+.login-input{width:100%;max-width:360px;border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--surface);outline:none;margin-bottom:12px;text-transform:uppercase;}
+.login-input:focus{border-color:var(--accent);}
+.login-btn{width:100%;max-width:360px;padding:14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+.login-hint{font-size:12px;color:var(--sub);margin-top:20px;text-align:center;line-height:1.8;}
+.login-hint b{color:var(--accent);}
+.signup-link{font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;margin-top:16px;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.hamburger{width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-size:16px;}
+.logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--accent);}
+.logo span{color:var(--text);}
+.client-badge{background:var(--gold);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:400;}
+.drawer-overlay.open{display:block;}
+.drawer{position:fixed;top:0;left:-280px;width:280px;height:100%;background:var(--surface);z-index:500;transition:left .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+.drawer.open{left:0;}
+.drawer-head{padding:20px;border-bottom:1px solid var(--border);}
+.drawer-name{font-family:'DM Serif Display',serif;font-size:18px;}
+.drawer-plan{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;margin-top:4px;padding:3px 9px;border-radius:20px;}
+.drawer-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:13px 20px;font-size:14px;font-weight:500;cursor:pointer;transition:background .12s;}
+.drawer-item:hover{background:var(--bg);}
+.drawer-item .di{font-size:16px;width:20px;text-align:center;}
+.drawer-section{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.8px;text-transform:uppercase;padding:14px 20px 4px;}
+.drawer-close{padding:16px 20px;border-top:1px solid var(--border);}
+.drawer-close button{width:100%;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--sub);cursor:pointer;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:200;max-width:480px;margin:0 auto;}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 14px;gap:3px;cursor:pointer;color:var(--sub);font-size:10px;font-weight:500;border:none;background:none;}
+.bn-item.active{color:var(--accent);}
+.bn-icon{font-size:19px;}
+main{max-width:480px;margin:0 auto;padding:16px 14px 100px;display:flex;flex-direction:column;gap:14px;}
+.profile-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:18px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh);}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:20px;color:var(--gold);flex-shrink:0;}
+.profile-name{font-family:'DM Serif Display',serif;font-size:18px;}
+.profile-sub{font-size:12px;color:var(--sub);margin-top:2px;}
+.profile-stats{display:flex;gap:16px;margin-top:10px;}
+.pstat-val{font-size:16px;font-weight:700;color:var(--accent);}
+.pstat-lbl{font-size:10px;color:var(--sub);margin-top:1px;}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
+.card-head{padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.card-title{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;}
+.card-action{font-size:12px;color:var(--accent);font-weight:600;cursor:pointer;}
+.prop-selector{padding:12px 16px;border-bottom:1px solid var(--border);}
+.prop-select{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;cursor:pointer;}
+.alert-banner{border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;}
+.alert-banner.clear{background:var(--accent-light);color:var(--accent);}
+.alert-banner.active{background:var(--alert-light);color:var(--alert);}
+.ab-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.clear .ab-dot{background:var(--accent);}
+.active .ab-dot{background:var(--alert);animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.photo-grid{padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.photo-thumb{aspect-ratio:1;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:transform .15s;}
+.photo-thumb:hover{transform:scale(1.02);}
+.photo-thumb.today{border-color:var(--accent);background:var(--accent-light);}
+.pt-icon{font-size:20px;}
+.pt-date{font-size:10px;color:var(--sub);text-align:center;line-height:1.3;}
+.photo-thumb.today .pt-date{color:var(--accent);}
+.view-all{margin:0 12px 12px;width:calc(100% - 24px);padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--sub);cursor:pointer;}
+.camera-box{padding:14px;}
+.camera-live{background:#0e0e0e;border-radius:10px;aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;position:relative;}
+.live-badge{position:absolute;top:10px;left:10px;background:#e74c3c;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;display:flex;align-items:center;gap:4px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1s infinite;}
+.upgrade-box{border:1.5px dashed var(--border);border-radius:10px;padding:22px;text-align:center;}
+.upgrade-icon{font-size:30px;margin-bottom:8px;}
+.upgrade-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.upgrade-sub{font-size:12px;color:var(--sub);margin-bottom:14px;line-height:1.5;}
+.upgrade-btn{background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.watcher-row{display:flex;align-items:center;padding:11px 16px;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.watcher-row:last-child{border-bottom:none;}
+.watcher-row:hover{background:var(--bg);}
+.wav{width:38px;height:38px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0;font-family:'DM Serif Display',serif;}
+.w-name{font-size:14px;font-weight:500;flex:1;}
+.w-role{font-size:11px;color:var(--sub);}
+.call-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;}
+.call-chip:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.alert-row{padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.alert-row:last-child{border-bottom:none;}
+.alert-row:hover{background:var(--bg);}
+.alert-row-top{display:flex;align-items:center;gap:8px;}
+.alert-dot-r{width:8px;height:8px;border-radius:50%;background:var(--alert);flex-shrink:0;animation:pulse 1.4s infinite;}
+.alert-prop{font-size:13px;font-weight:600;flex:1;}
+.alert-time-s{font-size:11px;color:var(--sub);}
+.alert-preview{font-size:12px;color:var(--sub);margin-top:4px;padding-left:16px;line-height:1.4;}
+.plan-grid{display:flex;flex-direction:column;gap:10px;padding:14px;}
+.plan-card{border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;}
+.plan-card.current{border-color:var(--accent);background:var(--accent-light);}
+.plan-card.gold-plan{border-color:var(--gold);background:var(--gold-light);}
+.current-badge{position:absolute;top:12px;right:12px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.gold-badge{position:absolute;top:12px;right:12px;background:var(--gold);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.plan-name{font-size:16px;font-weight:700;margin-bottom:10px;}
+.plan-features{list-style:none;}
+.plan-features li{font-size:13px;color:var(--sub);padding:3px 0;display:flex;align-items:center;gap:7px;}
+.plan-features li::before{content:"✓";color:var(--accent);font-weight:700;}
+.gold-plan .plan-features li::before{color:var(--gold);}
+.plan-price{font-size:13px;font-weight:600;color:var(--accent);margin-top:12px;}
+.gold-plan .plan-price{color:var(--gold);}
+.upgrade-plan-btn{margin-top:12px;width:100%;padding:10px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.gold-plan .upgrade-plan-btn{background:var(--gold);}
+.stat-strip{display:flex;padding:14px 16px;border-bottom:1px solid var(--border);}
+.stat-cell{flex:1;text-align:center;border-right:1px solid var(--border);}
+.stat-cell:last-child{border-right:none;}
+.stat-val{font-size:20px;font-weight:700;color:var(--accent);}
+.stat-lbl{font-size:10px;color:var(--sub);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:900;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:700;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:18px 22px 36px;width:100%;max-width:480px;animation:slideUp .22s ease;max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:14px;}
+.modal-av{width:54px;height:54px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--accent);font-family:'DM Serif Display',serif;margin:0 auto 10px;}
+.modal-nm{font-size:17px;font-weight:600;text-align:center;}
+.modal-rl{font-size:12px;color:var(--sub);text-align:center;margin-bottom:20px;}
+.modal-row{display:flex;gap:10px;margin-top:4px;}
+.mbtn{flex:1;padding:12px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.mbtn.primary{background:var(--accent);color:#fff;}
+.mbtn.secondary{background:var(--bg);color:var(--sub);border:1px solid var(--border);}
+.mbtn:hover{opacity:.84;}
+.alert-detail-box{background:var(--alert-light);border:1px solid #f5c6c2;border-radius:8px;padding:12px;margin-bottom:14px;}
+.adb-msg{font-size:13px;color:var(--alert);font-weight:500;}
+.adb-time{font-size:11px;color:var(--sub);margin-top:4px;}
+.call-option{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
+.call-option:hover{background:var(--accent-light);border-color:var(--accent);}
+.call-option-icon{font-size:22px;}
+.call-option-label{font-size:14px;font-weight:600;}
+.call-option-sub{font-size:12px;color:var(--sub);margin-top:2px;}
+.sec-lbl{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;padding:10px 0 6px;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-logo">Land<span>Watch</span></div>
+  <div class="login-sub">Your land. Always watched.</div>
+  <div class="login-label">Client Code</div>
+  <input class="login-input" type="text" id="codeInput" placeholder="e.g. LW-001" maxlength="10">
+  <button class="login-btn" onclick="doLogin()">Continue →</button>
+  <div class="login-hint">
+    Demo codes:<br>
+    <b>LW-001</b> · Anjali Singh (Pro Max)<br>
+    <b>LW-002</b> · Deepak Yadav (Pro)<br>
+    <b>LW-003</b> · Ramesh Gupta (Normal)<br>
+    <br>Or use your registered code
+  </div>
+  <div class="signup-link" onclick="window.location.href='landwatch-signup.html'">New user? Register here →</div>
+</div>
+
+<div id="appShell" style="display:none;">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openDrawer()">☰</div>
+      <div class="logo">Land<span>Watch</span></div>
+    </div>
+    <div class="client-badge">Client</div>
+  </div>
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-head">
+      <div class="drawer-name" id="drawerName"></div>
+      <div class="drawer-plan" id="drawerPlan"></div>
+    </div>
+    <div class="drawer-nav">
+      <div class="drawer-section">Navigation</div>
+      <div class="drawer-item" onclick="switchTab('dashboard');closeDrawer()"><span class="di">📊</span>Dashboard</div>
+      <div class="drawer-item" onclick="switchTab('watchers');closeDrawer()"><span class="di">👥</span>My Watch Group</div>
+      <div class="drawer-item" onclick="switchTab('alerts');closeDrawer()"><span class="di">🚨</span>Alerts</div>
+      <div class="drawer-item" onclick="switchTab('plans');closeDrawer()"><span class="di">📋</span>Plans</div>
+      <div class="drawer-section">Account</div>
+      <div class="drawer-item"><span class="di">⚙️</span>Settings</div>
+      <div class="drawer-item" onclick="doLogout()"><span class="di">🚪</span>Logout</div>
+    </div>
+    <div class="drawer-close"><button onclick="closeDrawer()">Close Menu</button></div>
+  </div>
+  <main>
+    <div id="tab-dashboard" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="profile-card">
+        <div class="profile-avatar" id="profileAv"></div>
+        <div>
+          <div class="profile-name" id="profileName"></div>
+          <div class="profile-sub" id="profileSub"></div>
+          <div class="profile-stats">
+            <div><div class="pstat-val" id="propCount">—</div><div class="pstat-lbl">Properties</div></div>
+            <div><div class="pstat-val">5</div><div class="pstat-lbl">Watchers</div></div>
+            <div><div class="pstat-val" id="planLabel">—</div><div class="pstat-lbl">Plan</div></div>
+          </div>
+        </div>
+      </div>
+      <div id="alertBanner" class="alert-banner clear"><div class="ab-dot"></div><span id="alertBannerText">All clear — no alerts today</span></div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>🏡</span>Your Properties</div></div>
+        <div class="prop-selector"><select class="prop-select" id="propSelect" onchange="renderCamera()"></select></div>
+        <div class="card-head" style="border-top:1px solid var(--border);"><div class="card-title"><span>📸</span>Daily Photos</div></div>
+        <div class="photo-grid" id="photoGrid"></div>
+        <button class="view-all" onclick="showToast('📂 Opening full gallery…')">View all photos →</button>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>📹</span>Live Camera</div></div>
+        <div class="camera-box" id="cameraBox"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>📅</span>This Month</div></div>
+        <div class="stat-strip">
+          <div class="stat-cell"><div class="stat-val">28</div><div class="stat-lbl">Visits</div></div>
+          <div class="stat-cell"><div class="stat-val">28</div><div class="stat-lbl">Photos</div></div>
+          <div class="stat-cell"><div class="stat-val" id="alertStatCount">0</div><div class="stat-lbl">Alerts</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-watchers" style="display:none;flex-direction:column;gap:14px;">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>👥</span>Your Watch Group</div><div class="card-action">5 members</div></div>
+        <div id="watcherList"></div>
+      </div>
+    </div>
+    <div id="tab-alerts" style="display:none;flex-direction:column;gap:14px;">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>🚨</span>Alerts</div><div class="card-action" id="alertTabCount">0 active</div></div>
+        <div id="alertListEl"></div>
+      </div>
+    </div>
+    <div id="tab-plans" style="display:none;flex-direction:column;gap:14px;">
+      <div style="font-size:13px;color:var(--sub);padding:4px 2px;">Your current plan and available upgrades.</div>
+      <div class="plan-grid" id="planGrid"></div>
+    </div>
+  </main>
+  <div class="bottom-nav">
+    <button class="bn-item active" id="bn-dashboard" onclick="switchTab('dashboard')"><span class="bn-icon">📊</span>Dashboard</button>
+    <button class="bn-item" id="bn-watchers" onclick="switchTab('watchers')"><span class="bn-icon">👥</span>Watchers</button>
+    <button class="bn-item" id="bn-alerts" onclick="switchTab('alerts')"><span class="bn-icon">🚨</span>Alerts</button>
+    <button class="bn-item" id="bn-plans" onclick="switchTab('plans')"><span class="bn-icon">📋</span>Plans</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="callModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-av" id="callAv"></div>
+    <div class="modal-nm" id="callName"></div>
+    <div class="modal-rl" id="callRole"></div>
+    <div class="modal-row">
+      <button class="mbtn primary" onclick="showToast('📞 Calling…');closeModal('callModal')">📞 Call Now</button>
+      <button class="mbtn secondary" onclick="closeModal('callModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="alertDetailModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🚨 Alert</div>
+    <div class="alert-detail-box"><div class="adb-msg" id="adMsg"></div><div class="adb-time" id="adTime"></div></div>
+    <div class="sec-lbl">Contact Your Group</div>
+    <div class="call-option" onclick="showToast('📞 Calling Group Leader…');closeModal('alertDetailModal')"><div class="call-option-icon">📞</div><div><div class="call-option-label">Call Watcher</div><div class="call-option-sub">Speak directly to your group leader</div></div></div>
+    <div class="call-option" onclick="showToast('📹 Arranging group call');closeModal('alertDetailModal')"><div class="call-option-icon">👥</div><div><div class="call-option-label">Group Call — With Watchers</div><div class="call-option-sub">You + full team on one call</div></div></div>
+    <div class="call-option" onclick="showToast('🛡️ Watchers notified!');closeModal('alertDetailModal')"><div class="call-option-icon">🛡️</div><div><div class="call-option-label">Let Watchers Handle It</div><div class="call-option-sub">Team will act and update you</div></div></div>
+    <button class="mbtn secondary" style="width:100%;margin-top:6px;" onclick="closeModal('alertDetailModal')">Close</button>
+  </div>
+</div>
+
+<script>
+const watchers=[
+  {name:'Virat Kohli',init:'VK',role:'Group Leader'},
+  {name:'Rohit Sharma',init:'RS',role:'Senior Watcher'},
+  {name:'MS Dhoni',init:'MD',role:'Field Scout'},
+  {name:'Hardik Pandya',init:'HP',role:'Field Scout'},
+  {name:'Rahul Verma',init:'RV',role:'Senior Watcher'},
+];
+const planInfo={
+  normal:{label:'Normal',cls:'plan-normal',features:['Daily photos'],price:'₹499/month'},
+  pro:{label:'Pro',cls:'plan-pro',features:['Daily photos','Alert with consultant','Up to 2 properties'],price:'₹999/month'},
+  promax:{label:'Pro Max',cls:'plan-promax',features:['Daily photos','Alert with consultant','Live camera','Up to 5 properties'],price:'₹1,999/month'},
+};
+const planOrder=['normal','pro','promax'];
+
+// Default users always available
+const defaultUsers=[
+  {code:'LW-001',name:'Anjali Singh',init:'AS',plan:'promax',properties:[{label:'Gomti Nagar, Plot 12, Lucknow',camera:true},{label:'Hazratganj House 3, Lucknow',camera:true},{label:'Vikas Nagar Field, Lucknow',camera:false}],alerts:[{msg:'Unknown person seen near east boundary. Standing ~10 mins.',time:'Today, 11:32 AM · Rohit Sharma'}]},
+  {code:'LW-002',name:'Deepak Yadav',init:'DY',plan:'pro',properties:[{label:'Aliganj Field B, Lucknow',camera:false},{label:'Sitapur Road Farm, Lucknow',camera:false}],alerts:[]},
+  {code:'LW-003',name:'Ramesh Gupta',init:'RG',plan:'normal',properties:[{label:'Indira Nagar Land, Lucknow',camera:false}],alerts:[]},
+];
+
+function getAllUsers(){
+  const saved=localStorage.getItem('lw_users');
+  if(!saved) return defaultUsers;
+  try{
+    const parsed=JSON.parse(saved);
+    // Merge defaults + new registered users
+    const newUsers=parsed.filter(u=>!defaultUsers.find(d=>d.code===u.code));
+    return [...defaultUsers,...newUsers];
+  }catch(e){return defaultUsers;}
+}
+
+let currentUser=null;
+
+function doLogin(){
+  const code=document.getElementById('codeInput').value.trim().toUpperCase();
+  if(!code){showToast('⚠️ Enter your code');return;}
+  const users=getAllUsers();
+  const user=users.find(u=>u.code===code);
+  if(!user){showToast('⚠️ Invalid code. Check and try again.');return;}
+  currentUser=user;
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='block';
+  initApp();
+}
+document.getElementById('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+function doLogout(){
+  currentUser=null;
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('codeInput').value='';
+}
+
+function initApp(){
+  const u=currentUser;const p=planInfo[u.plan];
+  document.getElementById('profileAv').textContent=u.init;
+  document.getElementById('profileName').textContent=u.name;
+  document.getElementById('profileSub').textContent='Code: '+u.code;
+  document.getElementById('propCount').textContent=u.properties.length;
+  document.getElementById('planLabel').textContent=p.label;
+  document.getElementById('drawerName').textContent=u.name;
+  document.getElementById('drawerPlan').textContent=p.label;
+  document.getElementById('drawerPlan').className='drawer-plan plan-tag '+p.cls;
+  const sel=document.getElementById('propSelect');
+  sel.innerHTML=u.properties.map((pr,i)=>`<option value="${i}">📍 ${pr.label}</option>`).join('');
+  updateAlertBanner();renderPhotos();renderCamera();renderAlertStat();
+  switchTab('dashboard');
+}
+
+function renderPhotos(){
+  const grid=document.getElementById('photoGrid');
+  // Load real watcher-uploaded photos from localStorage for this client
+  const allPhotos=JSON.parse(localStorage.getItem('lw_photos')||'[]');
+  const myPhotos=allPhotos.filter(p=>p.clientCode===currentUser.code);
+
+  if(myPhotos.length){
+    grid.innerHTML=myPhotos.slice(0,6).map((p,i)=>`
+      <div class="photo-thumb ${i===0?'today':''}" onclick="openPhotoModal(${i})" style="overflow:hidden;padding:0;position:relative;">
+        <img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);padding:4px 6px;font-size:9px;color:#fff;font-weight:600;">${p.date} · ${p.time}</div>
+      </div>`).join('');
+    // Store for modal
+    window._myPhotos=myPhotos;
+  } else {
+    // Fallback demo thumbs if no real photos yet
+    const dates=['Today','Jul 15','Jul 14','Jul 13','Jul 12','Jul 11'];
+    grid.innerHTML=dates.map((d,i)=>`
+      <div class="photo-thumb ${i===0?'today':''}" onclick="showToast('📷 No real photo yet')">
+        <div class="pt-icon">${i===0?'⏳':'🖼️'}</div>
+        <div class="pt-date">${i===0?'Waiting for watcher…':d}</div>
+      </div>`).join('');
+    window._myPhotos=[];
+  }
+}
+
+function openPhotoModal(i){
+  const p=window._myPhotos[i];
+  if(!p)return;
+  document.getElementById('photoModalImg').src=p.image;
+  document.getElementById('photoModalMeta').textContent=p.date+' · '+p.time+' · GPS: 26.8467°N, 80.9462°E';
+  document.getElementById('photoModal').classList.add('open');
+}
+
+function renderCamera(){
+  const idx=parseInt(document.getElementById('propSelect').value||0);
+  const prop=currentUser.properties[idx];
+  const hasCam=prop&&prop.camera&&currentUser.plan==='promax';
+  document.getElementById('cameraBox').innerHTML=hasCam?`
+    <div class="camera-live">
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div style="font-size:36px;opacity:.4;">📡</div>
+      <div style="font-size:12px;opacity:.5;margin-top:6px;">Connecting to feed…</div>
+    </div>`:
+    currentUser.plan!=='promax'?`
+    <div class="upgrade-box">
+      <div class="upgrade-icon">📹</div>
+      <div class="upgrade-title">Camera not in your plan</div>
+      <div class="upgrade-sub">Upgrade to Pro Max for live camera access.</div>
+      <button class="upgrade-btn" onclick="switchTab('plans')">See Plans →</button>
+    </div>`:`
+    <div class="upgrade-box">
+      <div class="upgrade-icon">📹</div>
+      <div class="upgrade-title">No camera on this property</div>
+      <div class="upgrade-sub">Contact your group to add a camera.</div>
+      <button class="upgrade-btn" onclick="showToast('📞 Contacting group…')">Contact Group</button>
+    </div>`;
+}
+
+function updateAlertBanner(){
+  const alerts=currentUser.alerts||[];
+  const banner=document.getElementById('alertBanner');
+  const txt=document.getElementById('alertBannerText');
+  if(alerts.length){banner.className='alert-banner active';txt.textContent='⚠️ '+alerts.length+' active alert — check Alerts tab';}
+  else{banner.className='alert-banner clear';txt.textContent='All clear — no alerts today';}
+}
+function renderAlertStat(){
+  const c=(currentUser.alerts||[]).length;
+  document.getElementById('alertStatCount').textContent=c;
+  document.getElementById('alertTabCount').textContent=c+' active';
+}
+
+const tabs=['dashboard','watchers','alerts','plans'];
+function switchTab(tab){
+  tabs.forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    el.style.display=t===tab?'flex':'none';
+    el.style.flexDirection='column';
+    const bn=document.getElementById('bn-'+t);
+    if(bn)bn.classList.toggle('active',t===tab);
+  });
+  if(tab==='watchers')renderWatchers();
+  if(tab==='alerts')renderAlerts();
+  if(tab==='plans')renderPlans();
+}
+
+function renderWatchers(){
+  document.getElementById('watcherList').innerHTML=watchers.map(w=>`
+    <div class="watcher-row" onclick="openCallModal('${w.init}','${w.name}','${w.role}')">
+      <div class="wav">${w.init}</div>
+      <div style="flex:1"><div class="w-name">${w.name}</div><div class="w-role">${w.role}</div></div>
+      <div class="call-chip">📞 Call</div>
+    </div>`).join('');
+}
+
+function renderAlerts(){
+  const el=document.getElementById('alertListEl');
+  const alerts=currentUser.alerts||[];
+  document.getElementById('alertTabCount').textContent=alerts.length+' active';
+  if(!alerts.length){el.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:var(--accent);">✅ No alerts on your properties</div>';return;}
+  el.innerHTML=alerts.map((a,i)=>`
+    <div class="alert-row" onclick="openAlertDetail(${i})">
+      <div class="alert-row-top"><div class="alert-dot-r"></div><div class="alert-prop">Property Alert</div><div class="alert-time-s">${a.time.split('·')[0].trim()}</div></div>
+      <div class="alert-preview">${a.msg.substring(0,70)}…</div>
+    </div>`).join('');
+}
+
+function renderPlans(){
+  const current=currentUser.plan;const currentIdx=planOrder.indexOf(current);
+  document.getElementById('planGrid').innerHTML=planOrder.map((pk,i)=>{
+    const p=planInfo[pk];const isCurrent=pk===current;const isUpgrade=i>currentIdx;
+    return `<div class="plan-card ${isCurrent?'current':''} ${pk==='promax'&&isUpgrade?'gold-plan':''}">
+      ${isCurrent?'<div class="current-badge">Current</div>':''}
+      ${pk==='promax'&&isUpgrade?'<div class="gold-badge">Best</div>':''}
+      <div class="plan-name">${p.label}</div>
+      <ul class="plan-features">${p.features.map(f=>'<li>'+f+'</li>').join('')}</ul>
+      <div class="plan-price">${p.price}</div>
+      ${isUpgrade?`<button class="upgrade-plan-btn" onclick="showToast('Upgrading to ${p.label}…')">Upgrade to ${p.label}</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawerOverlay').classList.add('open');}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawerOverlay').classList.remove('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openCallModal(init,name,role){
+  document.getElementById('callAv').textContent=init;
+  document.getElementById('callName').textContent=name;
+  document.getElementById('callRole').textContent=role;
+  document.getElementById('callModal').classList.add('open');
+}
+function openAlertDetail(i){
+  const a=currentUser.alerts[i];
+  document.getElementById('adMsg').textContent=a.msg;
+  document.getElementById('adTime').textContent=a.time;
+  document.getElementById('alertDetailModal').classList.add('open');
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+</script>
+
+<!-- PHOTO MODAL -->
+<div class="modal-overlay" id="photoModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <img id="photoModalImg" style="width:100%;border-radius:10px;margin-bottom:10px;" src="">
+    <div id="photoModalMeta" style="font-size:12px;color:var(--accent);font-weight:500;text-align:center;margin-bottom:14px;"></div>
+    <button class="mbtn secondary" style="width:100%;" onclick="closeModal('photoModal')">Close</button>
+  </div>
+</div>
+
+</body>
+</html>
