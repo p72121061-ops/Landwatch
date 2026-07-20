@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch — Watcher</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F4F0;--surface:#FFF;--border:#E6E4DE;--text:#181815;--sub:#82807A;
+  --accent:#2B6651;--accent-light:#E8F2ED;--alert:#B83232;--alert-light:#FDECEA;
+  --gold:#8A6F2E;--gold-light:#FDF6E3;--r:14px;--sh:0 2px 10px rgba(0,0,0,.055);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#wLoginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+.wlogin-logo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--accent);margin-bottom:4px;}
+.wlogin-logo span{color:var(--text);}
+.wlogin-badge{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:28px;}
+.wlogin-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;align-self:flex-start;width:100%;max-width:360px;}
+.wlogin-input{width:100%;max-width:360px;border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--surface);outline:none;margin-bottom:12px;}
+.wlogin-input:focus{border-color:var(--accent);}
+.wlogin-btn{width:100%;max-width:360px;padding:14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+.wlogin-hint{font-size:12px;color:var(--sub);margin-top:20px;text-align:center;line-height:1.8;}
+.wlogin-hint b{color:var(--accent);}
+.wlogin-client-link{font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;margin-top:14px;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.hamburger{width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-size:16px;}
+.logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--accent);}
+.logo span{color:var(--text);}
+.watcher-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:400;}
+.drawer-overlay.open{display:block;}
+.drawer{position:fixed;top:0;left:-280px;width:280px;height:100%;background:var(--surface);z-index:500;transition:left .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+.drawer.open{left:0;}
+.drawer-head{padding:20px;border-bottom:1px solid var(--border);}
+.drawer-name{font-family:'DM Serif Display',serif;font-size:18px;}
+.drawer-role{font-size:12px;color:var(--sub);margin-top:2px;}
+.drawer-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:13px 20px;font-size:14px;font-weight:500;cursor:pointer;transition:background .12s;}
+.drawer-item:hover{background:var(--bg);}
+.drawer-item .di{font-size:16px;width:20px;text-align:center;}
+.drawer-section{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.8px;text-transform:uppercase;padding:14px 20px 4px;}
+.drawer-close{padding:16px 20px;border-top:1px solid var(--border);}
+.drawer-close button{width:100%;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--sub);cursor:pointer;}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:200;max-width:480px;margin:0 auto;}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 14px;gap:3px;cursor:pointer;color:var(--sub);font-size:10px;font-weight:500;border:none;background:none;}
+.bn-item.active{color:var(--accent);}
+.bn-icon{font-size:19px;}
+main{max-width:480px;margin:0 auto;padding:16px 14px 100px;display:flex;flex-direction:column;gap:14px;}
+.profile-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:18px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh);}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:20px;color:var(--accent);flex-shrink:0;}
+.profile-name{font-family:'DM Serif Display',serif;font-size:18px;}
+.profile-role-txt{font-size:12px;color:var(--sub);margin-top:2px;}
+.profile-stats{display:flex;gap:16px;margin-top:10px;}
+.pstat-val{font-size:16px;font-weight:700;color:var(--accent);}
+.pstat-lbl{font-size:10px;color:var(--sub);margin-top:1px;}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
+.card-head{padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.card-title{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;}
+.card-action{font-size:12px;color:var(--accent);font-weight:600;}
+.stat-strip{display:flex;padding:14px 16px;border-bottom:1px solid var(--border);}
+.stat-cell{flex:1;text-align:center;border-right:1px solid var(--border);}
+.stat-cell:last-child{border-right:none;}
+.stat-val{font-size:20px;font-weight:700;color:var(--accent);}
+.stat-lbl{font-size:10px;color:var(--sub);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;}
+.action-card{border-radius:10px;border:1px solid var(--border);padding:14px;cursor:pointer;transition:all .15s;background:var(--bg);}
+.action-card:hover{background:var(--accent-light);border-color:var(--accent);}
+.action-icon{font-size:22px;margin-bottom:6px;}
+.action-label{font-size:13px;font-weight:600;}
+.action-sub{font-size:11px;color:var(--sub);margin-top:2px;line-height:1.4;}
+.member-row{display:flex;align-items:center;padding:11px 16px;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.member-row:last-child{border-bottom:none;}
+.member-row:hover{background:var(--bg);}
+.av{width:38px;height:38px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0;}
+.member-name-txt{font-size:14px;font-weight:500;flex:1;}
+.member-role-tag{font-size:11px;color:var(--sub);}
+.call-chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;}
+.call-chip:hover{background:var(--accent);color:#fff;}
+.client-row{display:flex;align-items:center;padding:12px 16px;gap:10px;border-bottom:1px solid var(--border);}
+.client-row:last-child{border-bottom:none;}
+.client-av{width:36px;height:36px;border-radius:10px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0;}
+.client-info{flex:1;min-width:0;}
+.client-name-txt{font-size:13px;font-weight:600;}
+.client-loc{font-size:11px;color:var(--sub);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.client-actions{display:flex;gap:5px;flex-shrink:0;}
+.icon-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;}
+.icon-btn:hover{background:var(--accent-light);}
+.alert-row{padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+.alert-row:last-child{border-bottom:none;}
+.alert-row:hover{background:var(--bg);}
+.alert-row-top{display:flex;align-items:center;gap:8px;}
+.alert-dot{width:8px;height:8px;border-radius:50%;background:var(--alert);flex-shrink:0;animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.alert-client-name{font-size:13px;font-weight:600;flex:1;}
+.alert-time-small{font-size:11px;color:var(--sub);}
+.alert-msg-preview{font-size:12px;color:var(--sub);margin-top:4px;padding-left:16px;line-height:1.4;}
+.pending-item{display:flex;align-items:center;padding:11px 16px;gap:10px;border-bottom:1px solid var(--border);}
+.pending-item:last-child{border-bottom:none;}
+.pending-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.pending-name{font-size:13px;font-weight:500;flex:1;}
+.pending-loc-txt{font-size:11px;color:var(--sub);}
+.mark-done-btn{font-size:11px;font-weight:600;color:var(--accent);cursor:pointer;background:var(--accent-light);padding:4px 10px;border-radius:6px;border:none;font-family:'DM Sans',sans-serif;}
+.plan-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;}
+.plan-normal{background:#EEF2F7;color:#4A6080;}
+.plan-pro{background:var(--accent-light);color:var(--accent);}
+.plan-promax{background:var(--gold-light);color:var(--gold);}
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:900;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:700;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:18px 22px 36px;width:100%;max-width:480px;animation:slideUp .22s ease;max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:14px;}
+.modal-av{width:54px;height:54px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--accent);font-family:'DM Serif Display',serif;margin:0 auto 10px;}
+.modal-nm{font-size:17px;font-weight:600;text-align:center;}
+.modal-rl{font-size:12px;color:var(--sub);text-align:center;margin-bottom:20px;}
+.modal-row{display:flex;gap:10px;margin-top:4px;}
+.mbtn{flex:1;padding:12px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.mbtn.primary{background:var(--accent);color:#fff;}
+.mbtn.secondary{background:var(--bg);color:var(--sub);border:1px solid var(--border);}
+.mbtn.danger{background:var(--alert);color:#fff;}
+.mbtn:hover{opacity:.84;}
+.modal-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;resize:none;margin-bottom:10px;}
+.modal-input:focus{border-color:var(--accent);}
+.modal-select{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;margin-bottom:10px;cursor:pointer;}
+.upload-area{border:1.5px dashed var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:10px;cursor:pointer;transition:all .15s;}
+.upload-area:hover{border-color:var(--accent);background:var(--accent-light);}
+.call-option{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
+.call-option:hover{background:var(--accent-light);border-color:var(--accent);}
+.call-option-icon{font-size:22px;}
+.call-option-label{font-size:14px;font-weight:600;}
+.call-option-sub{font-size:12px;color:var(--sub);margin-top:2px;}
+.alert-detail-box{background:var(--alert-light);border:1px solid #f5c6c2;border-radius:8px;padding:12px;margin-bottom:14px;}
+.adb-msg{font-size:13px;color:var(--alert);font-weight:500;}
+.adb-time{font-size:11px;color:var(--sub);margin-top:4px;}
+.section-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;padding:10px 16px 4px;}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gps-tag{font-size:11px;color:var(--accent);font-weight:600;background:var(--accent-light);padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:8px;}
+</style>
+</head>
+<body>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, onSnapshot, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCO_3ZIXLJGehvcIeZZqTm1tZTFm0NGtIE",
+  authDomain: "landwatch-f8bf6.firebaseapp.com",
+  databaseURL: "https://landwatch-f8bf6-default-rtdb.firebaseio.com",
+  projectId: "landwatch-f8bf6",
+  storageBucket: "landwatch-f8bf6.firebasestorage.app",
+  messagingSenderId: "37024480482",
+  appId: "1:37024480482:web:a8d07998738b34db02b2bb"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const rtdb = getDatabase(app);
+
+// ── GLOBALS ──
+let currentWatcher = null;
+let myClients = [];
+let myAlerts = [];
+let capturedImageData = null;
+let captureTargetClientId = null;
+let currentAlertId = null;
+let currentGPS = null;
+let alertsUnsubscribe = null;
+
+// ── WATCHER LOGIN ──
+window.doWatcherLogin = async function() {
+  const email = document.getElementById('wEmailInput').value.trim();
+  const pass = document.getElementById('wPassInput').value.trim();
+  if (!email || !pass) { showToast('⚠️ Enter email and password'); return; }
+  const btn = document.getElementById('wLoginBtn');
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    // Load watcher profile from Firestore
+    const wDoc = await getDoc(doc(db, 'watchers', cred.user.uid));
+    if (!wDoc.exists()) {
+      showToast('⚠️ Watcher profile not found');
+      await signOut(auth);
+      btn.innerHTML = 'Login →'; btn.disabled = false;
+      return;
+    }
+    currentWatcher = { uid: cred.user.uid, ...wDoc.data() };
+    initWatcherApp();
+  } catch(e) {
+    showToast('⚠️ ' + (e.code === 'auth/invalid-credential' ? 'Wrong email or password' : e.message));
+    btn.innerHTML = 'Login →'; btn.disabled = false;
+  }
+};
+
+// demoLogin removed — use real credentials from admin
+
+function initWatcherApp() {
+  document.getElementById('wLoginScreen').style.display = 'none';
+  document.getElementById('wAppShell').style.display = 'block';
+  // Set profile
+  const init = currentWatcher.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('wProfileAv').textContent = init;
+  document.getElementById('wProfileName').textContent = currentWatcher.name;
+  document.getElementById('wProfileRole').textContent = currentWatcher.role + ' · Group A';
+  document.querySelector('.drawer-name').textContent = currentWatcher.name;
+  document.querySelector('.drawer-role').textContent = currentWatcher.role;
+  loadMyClients();
+  listenToAlerts();
+  switchTab('dashboard');
+}
+
+// ── LOAD CLIENTS ──
+async function loadMyClients() {
+  try {
+    const q = query(collection(db, 'clients'), where('assignedWatcherGroup', '==', currentWatcher.groupId || 'groupA'));
+    const snap = await getDocs(q);
+    myClients = snap.docs.map(d => ({ id: d.id, ...d.data(), visited: false }));
+    document.getElementById('wClientStatCount').textContent = myClients.length;
+    if (!myClients.length) {
+      showToast('No clients assigned yet');
+    }
+    renderPending();
+    populateSelects();
+  } catch(e) { console.error(e); }
+}
+
+// ── LISTEN TO ALERTS (REAL-TIME) ──
+function listenToAlerts() {
+  if (alertsUnsubscribe) alertsUnsubscribe();
+  const q = query(collection(db, 'alerts'), where('watcherGroup', '==', currentWatcher.groupId || 'groupA'), orderBy('createdAt', 'desc'));
+  alertsUnsubscribe = onSnapshot(q, snap => {
+    myAlerts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    document.getElementById('wAlertCount').textContent = myAlerts.length;
+    document.getElementById('alertCountLabel').textContent = myAlerts.length + ' active';
+    renderAlerts();
+    renderPending();
+  }, err => console.error(err));
+}
+
+// ── GPS ──
+function getGPS() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6), acc: Math.round(pos.coords.accuracy) }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  });
+}
+
+// ── COMPRESS IMAGE ──
+function compressImage(dataUrl, maxW=800) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ratio = Math.min(maxW / img.width, 1);
+      canvas.width = img.width * ratio;
+      canvas.height = img.height * ratio;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.6));
+    };
+    img.src = dataUrl;
+  });
+}
+
+// ── PENDING ──
+window.renderPending = function() {
+  const pending = myClients.filter(c => !c.visited);
+  const visited = myClients.filter(c => c.visited);
+  document.getElementById('visitedCount').textContent = visited.length;
+  document.getElementById('pendingCount').textContent = pending.length;
+  const el = document.getElementById('pendingList');
+  if (!pending.length) { el.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:var(--accent);font-weight:500;">✅ All visits done for today!</div>'; return; }
+  el.innerHTML = '<div class="section-label">Tap 📷 to take photo & mark done</div>' +
+    pending.map(c => `<div class="pending-item">
+      <div class="pending-dot"></div>
+      <div style="flex:1"><div class="pending-name">${c.name}</div><div class="pending-loc-txt">📍 ${c.loc.split(',')[0]}</div></div>
+      <button class="mark-done-btn" onclick="openCameraForClient('${c.id}')">📷 Photo</button>
+    </div>`).join('');
+};
+
+// ── RENDER MEMBERS ──
+window.renderMembers = async function() {
+  const el = document.getElementById('memberList');
+  el.innerHTML = '<div style="padding:14px;text-align:center;font-size:13px;color:var(--sub);">Loading…</div>';
+  try {
+    const q = query(collection(db, 'watchers'), where('groupId', '==', currentWatcher.groupId || 'groupA'));
+    const snap = await getDocs(q);
+    const members = snap.docs.map(d => ({id:d.id,...d.data()}));
+    if (!members.length) {
+      el.innerHTML = '<div style="padding:14px;text-align:center;font-size:13px;color:var(--sub);">No team members yet</div>';
+      return;
+    }
+    el.innerHTML = members.map(m => {
+      const init = (m.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      return `<div class="member-row" onclick="openCallModal('${init}','${m.name||''}','${m.role||''}','${m.phone||''}')">
+        <div class="av">${init}</div>
+        <div style="flex:1"><div class="member-name-txt">${m.name||'—'}</div><div class="member-role-tag">${m.role||'Watcher'}</div></div>
+        <div class="call-chip">📞 Call</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="padding:14px;text-align:center;font-size:13px;color:var(--sub);">Error loading members</div>';
+  }
+};
+
+// ── RENDER CLIENTS ──
+const planInfo = { normal:{label:'Normal',cls:'plan-normal'}, pro:{label:'Pro',cls:'plan-pro'}, promax:{label:'Pro Max',cls:'plan-promax'} };
+window.renderClients = function() {
+  document.getElementById('clientList').innerHTML = myClients.map(c => {
+    const p = planInfo[c.plan] || planInfo.normal;
+    return `<div class="client-row">
+      <div class="client-av">${c.init}</div>
+      <div class="client-info">
+        <div class="client-name-txt">${c.name} <span class="plan-tag ${p.cls}">${p.label}</span></div>
+        <div class="client-loc">📍 ${c.loc}</div>
+      </div>
+      <div class="client-actions">
+        <div class="icon-btn" onclick="openCallModal('${c.init}','${c.name}','Client','${c.phone||''}')">📞</div>
+        <div class="icon-btn" onclick="openCameraForClient('${c.id}')">📷</div>
+        <div class="icon-btn" onclick="openPlanModal('${c.id}')">📋</div>
+      </div>
+    </div>`;
+  }).join('');
+  populateSelects();
+};
+
+// ── RENDER ALERTS ──
+window.renderAlerts = function() {
+  const el = document.getElementById('alertList');
+  if (!myAlerts.length) { el.innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--accent);">✅ No active alerts</div>'; return; }
+  el.innerHTML = myAlerts.map(a => {
+    const c = myClients.find(cl => cl.id === a.clientId) || {};
+    return `<div class="alert-row" onclick="openAlertDetail('${a.id}')">
+      <div class="alert-row-top">
+        <div class="alert-dot"></div>
+        <div class="alert-client-name">${c.name || a.clientName || 'Client'}</div>
+        <div class="alert-time-small">${a.timeStr || 'Now'}</div>
+      </div>
+      <div class="alert-msg-preview">${(a.msg||'').substring(0,70)}…</div>
+    </div>`;
+  }).join('');
+};
+
+// ── RENDER VISITED ──
+window.renderVisited = async function() {
+  const visited = myClients.filter(c => c.visited);
+  document.getElementById('visitedCountLabel').textContent = visited.length + ' done';
+  const el = document.getElementById('visitedList');
+  if (!visited.length) { el.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:var(--sub);">No visits yet today</div>'; }
+  else {
+    el.innerHTML = visited.map(c => {
+      const p = planInfo[c.plan] || planInfo.normal;
+      return `<div class="client-row">
+        <div class="client-av" style="background:var(--accent-light);color:var(--accent);">${c.init}</div>
+        <div class="client-info"><div class="client-name-txt">${c.name} <span class="plan-tag ${p.cls}">${p.label}</span></div><div class="client-loc">📍 ${c.loc}</div></div>
+        <div style="font-size:18px;">✅</div>
+      </div>`;
+    }).join('');
+  }
+  // Load today's photos
+  try {
+    const today = new Date().toDateString();
+    const q = query(collection(db, 'photos'), where('watcherUid', '==', currentWatcher.uid), where('dateStr', '==', today));
+    const snap = await getDocs(q);
+    const photos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    window._watcherPhotos = photos;
+    const pgrid = document.getElementById('visitedPhotoGrid');
+    if (!photos.length) { pgrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;font-size:13px;color:var(--sub);padding:12px;">No photos today</div>'; return; }
+    pgrid.innerHTML = photos.map((p,i) => `
+      <div style="aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--border);position:relative;cursor:pointer;" onclick="openWatcherPhoto(${i})">
+        <img src="${p.image}" style="width:100%;height:100%;object-fit:cover;">
+        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);padding:3px 5px;font-size:9px;color:#fff;">${p.clientName||''} · ${p.timeStr||''}</div>
+      </div>`).join('');
+  } catch(e) { console.error(e); }
+};
+
+window.openWatcherPhoto = function(i) {
+  const p = window._watcherPhotos[i];
+  if (!p) return;
+  document.getElementById('visitedPhotoModal').querySelector('img').src = p.image;
+  document.getElementById('visitedPhotoMeta').textContent = (p.clientName||'') + ' · ' + (p.dateStr||'') + ' · ' + (p.timeStr||'');
+  document.getElementById('visitedPhotoId').value = p.id;
+  document.getElementById('visitedPhotoModal').classList.add('open');
+};
+
+window.deletePhoto = async function() {
+  const id = document.getElementById('visitedPhotoId').value;
+  if (!id) return;
+  try {
+    await deleteDoc(doc(db, 'photos', id));
+    // Unmark visited for that client
+    const p = window._watcherPhotos.find(ph => ph.id === id);
+    if (p) {
+      const ci = myClients.findIndex(c => c.id === p.clientId);
+      if (ci > -1) myClients[ci].visited = false;
+    }
+    closeModal('visitedPhotoModal');
+    showToast('🗑️ Photo deleted');
+    renderVisited(); renderPending();
+  } catch(e) { showToast('Error: ' + e.message); }
+};
+
+// ── CAMERA ──
+window.openCameraForClient = function(clientId) {
+  captureTargetClientId = clientId;
+  const c = myClients.find(cl => cl.id === clientId);
+  document.getElementById('cameraClientName').textContent = c ? c.name + ' — ' + c.loc.split(',')[0] : '';
+  capturedImageData = null;
+  currentGPS = null;
+  document.getElementById('capturePreviewBox').style.display = 'none';
+  document.getElementById('captureUploadBtn').disabled = true;
+  document.getElementById('captureModal').classList.add('open');
+  // Get GPS immediately
+  getGPS().then(gps => {
+    currentGPS = gps;
+    if (gps) document.getElementById('gpsStatus').textContent = '📍 GPS: ' + gps.lat + ', ' + gps.lng + ' (±' + gps.acc + 'm)';
+    else document.getElementById('gpsStatus').textContent = '📍 GPS unavailable';
+  });
+};
+
+window.triggerRealCamera = function() {
+  document.getElementById('realCameraInput').value = '';
+  document.getElementById('realCameraInput').click();
+};
+
+window.onPhotoSelected = async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(ev) {
+    capturedImageData = await compressImage(ev.target.result);
+    const preview = document.getElementById('capturePreview');
+    preview.src = capturedImageData;
+    document.getElementById('capturePreviewBox').style.display = 'block';
+    const now = new Date();
+    document.getElementById('captureMeta').textContent = '📷 ' + now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}) + ' · ' + (currentGPS ? currentGPS.lat+', '+currentGPS.lng : 'No GPS');
+    document.getElementById('captureUploadBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+};
+
+window.submitCapture = async function() {
+  if (!captureTargetClientId || !capturedImageData) return;
+  const btn = document.getElementById('captureUploadBtn');
+  btn.innerHTML = '<span class="spinner"></span> Uploading…';
+  btn.disabled = true;
+  try {
+    const now = new Date();
+    const c = myClients.find(cl => cl.id === captureTargetClientId);
+    const photoData = {
+      clientId: captureTargetClientId,
+      clientCode: c ? c.code : '',
+      clientName: c ? c.name : '',
+      watcherUid: currentWatcher.uid,
+      watcherName: currentWatcher.name,
+      image: capturedImageData,
+      gps: currentGPS || null,
+      timeStr: now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}),
+      dateStr: now.toDateString(),
+      ts: now.getTime(),
+      createdAt: serverTimestamp(),
+    };
+    await addDoc(collection(db, 'photos'), photoData);
+    // Mark visited
+    const ci = myClients.findIndex(cl => cl.id === captureTargetClientId);
+    if (ci > -1) myClients[ci].visited = true;
+    // Notify client via RTDB
+    if (c && c.code) {
+      await set(ref(rtdb, 'notifications/' + c.code + '/photo'), { msg: '📸 New visit photo uploaded', time: now.toISOString(), watcherName: currentWatcher.name });
+    }
+    showToast('✅ Photo saved & visit marked!');
+    closeModal('captureModal');
+    renderPending();
+    btn.innerHTML = 'Upload & Mark Visited';
+    btn.disabled = false;
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+    btn.innerHTML = 'Upload & Mark Visited';
+    btn.disabled = false;
+  }
+};
+
+// ── SEND ALERT ──
+window.openAlertModal = function() {
+  populateSelects();
+  document.getElementById('alertText').value = '';
+  document.getElementById('alertModal').classList.add('open');
+};
+
+window.submitAlert = async function() {
+  const sel = document.getElementById('alertClientSelect');
+  const txt = document.getElementById('alertText').value.trim();
+  if (!sel.value) { showToast('⚠️ Select a client'); return; }
+  if (!txt) { showToast('⚠️ Write the alert message'); return; }
+  const btn = document.querySelector('#alertModal .mbtn.danger');
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+  try {
+    const c = myClients.find(cl => cl.id === sel.value);
+    const now = new Date();
+    const alertData = {
+      clientId: sel.value,
+      clientCode: c ? c.code : '',
+      clientName: c ? c.name : '',
+      watcherUid: currentWatcher.uid,
+      watcherName: currentWatcher.name,
+      watcherGroup: currentWatcher.groupId || 'groupA',
+      msg: txt,
+      timeStr: now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}),
+      createdAt: serverTimestamp(),
+      gps: currentGPS || null,
+    };
+    await addDoc(collection(db, 'alerts'), alertData);
+    // Push notification via RTDB — client listening
+    if (c && c.code) {
+      await push(ref(rtdb, 'notifications/' + c.code + '/alerts'), {
+        msg: '🚨 Alert: ' + txt.substring(0, 60),
+        time: now.toISOString(),
+        watcherName: currentWatcher.name,
+      });
+    }
+    showToast('🚨 Alert sent!');
+    closeModal('alertModal');
+    btn.innerHTML = 'Send Alert'; btn.disabled = false;
+  } catch(e) {
+    showToast('⚠️ ' + e.message);
+    btn.innerHTML = 'Send Alert'; btn.disabled = false;
+  }
+};
+
+// ── DELETE ALERT ──
+let currentAlertDocId = null;
+window.openAlertDetail = function(alertId) {
+  currentAlertDocId = alertId;
+  const a = myAlerts.find(al => al.id === alertId);
+  if (!a) return;
+  const c = myClients.find(cl => cl.id === a.clientId) || {};
+  document.getElementById('adClientName').textContent = c.name || a.clientName || '';
+  document.getElementById('adMsg').textContent = a.msg || '';
+  document.getElementById('adTime').textContent = (a.timeStr || '') + ' · ' + (a.watcherName || '');
+  document.getElementById('alertDetailModal').classList.add('open');
+};
+
+window.deleteAlert = async function() {
+  if (!currentAlertDocId) return;
+  try {
+    await deleteDoc(doc(db, 'alerts', currentAlertDocId));
+    closeModal('alertDetailModal');
+    showToast('🗑️ Alert removed');
+  } catch(e) { showToast('Error: ' + e.message); }
+};
+
+// ── PLAN MODAL ──
+window.openPlanModal = function(clientId) {
+  const c = myClients.find(cl => cl.id === clientId);
+  if (!c) return;
+  const p = planInfo[c.plan] || planInfo.normal;
+  const features = { normal:['Daily photos'], pro:['Daily photos','Alert with consultant','Up to 2 properties'], promax:['Daily photos','Alert with consultant','Live camera','Up to 5 properties'] };
+  document.getElementById('planModalTitle').textContent = c.name + ' — Plan';
+  document.getElementById('planModalContent').innerHTML = `
+    <div style="border:1px solid var(--accent);border-radius:10px;padding:14px;background:var(--accent-light);">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px;">${p.label}</div>
+      <ul style="list-style:none;">${(features[c.plan]||[]).map(f=>`<li style="font-size:12px;color:var(--sub);padding:2px 0;display:flex;align-items:center;gap:6px;"><span style="color:var(--accent);font-weight:700;">✓</span>${f}</li>`).join('')}</ul>
+    </div>`;
+  document.getElementById('planModal').classList.add('open');
+};
+
+// ── TABS ──
+const tabs = ['dashboard','team','clients','alerts','visited'];
+window.switchTab = function(tab) {
+  tabs.forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) { el.style.display = t === tab ? 'flex' : 'none'; el.style.flexDirection = 'column'; }
+    const bn = document.getElementById('bn-' + t);
+    if (bn) bn.classList.toggle('active', t === tab);
+  });
+  if (tab === 'team') renderMembers();
+  if (tab === 'clients') renderClients();
+  if (tab === 'alerts') renderAlerts();
+  if (tab === 'dashboard') renderPending();
+  if (tab === 'visited') renderVisited();
+};
+
+// ── HELPERS ──
+window.populateSelects = function() {
+  const opts = myClients.map(c => `<option value="${c.id}">${c.name} — ${c.loc.split(',')[0]}</option>`).join('');
+  ['alertClientSelect','captureClientSelect'].forEach(id => {
+    const s = document.getElementById(id);
+    if (s) s.innerHTML = '<option value="">Select…</option>' + opts;
+  });
+};
+
+window.openCallModal = function(init, name, role, phone) {
+  document.getElementById('callAv').textContent = init;
+  document.getElementById('callName').textContent = name;
+  document.getElementById('callRole').textContent = role;
+  document.getElementById('callPhoneRow').style.display = phone ? 'flex' : 'none';
+  document.getElementById('callNowBtn').onclick = phone ? () => window.location.href = 'tel:' + phone : () => showToast('No number saved');
+  document.getElementById('callModal').classList.add('open');
+};
+
+window.openDrawer = function() { document.getElementById('drawer').classList.add('open'); document.getElementById('drawerOverlay').classList.add('open'); };
+window.closeDrawer = function() { document.getElementById('drawer').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('open'); };
+window.closeModal = function(id) { document.getElementById(id).classList.remove('open'); };
+window.showToast = function(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); };
+
+window.doWatcherLogout = async function() {
+  if (alertsUnsubscribe) alertsUnsubscribe();
+  await signOut(auth);
+  currentWatcher = null; myClients = []; myAlerts = [];
+  document.getElementById('wAppShell').style.display = 'none';
+  document.getElementById('wLoginScreen').style.display = 'flex';
+};
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('wLoginScreen').style.display !== 'none') {
+    if (document.activeElement.id === 'wEmailInput') document.getElementById('wPassInput').focus();
+    else doWatcherLogin();
+  }
+});
+</script>
+
+<!-- LOGIN SCREEN -->
+<div id="wLoginScreen">
+  <div class="wlogin-logo">Land<span>Watch</span></div>
+  <div class="wlogin-badge">Watcher Portal</div>
+  <div class="wlogin-label">Email</div>
+  <input class="wlogin-input" type="email" id="wEmailInput" placeholder="watcher@landwatch.com">
+  <div class="wlogin-label">Password</div>
+  <input class="wlogin-input" type="password" id="wPassInput" placeholder="Enter password">
+  <button class="wlogin-btn" id="wLoginBtn" onclick="doWatcherLogin()">Login →</button>
+  <div style="font-size:12px;color:var(--sub);margin-top:16px;text-align:center;line-height:1.6;">
+    Admin se apna email aur password lo,<br>phir yahan login karo.
+  </div>
+  <div class="wlogin-client-link" onclick="window.location.href='landwatch-client.html'">Are you a client? Login here →</div>
+</div>
+
+<!-- WATCHER APP -->
+<div id="wAppShell" style="display:none;">
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="hamburger" onclick="openDrawer()">☰</div>
+    <div class="logo">Land<span>Watch</span></div>
+  </div>
+  <div class="watcher-badge">Watcher</div>
+</div>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="drawer-name"></div>
+    <div class="drawer-role" style="font-size:12px;color:var(--sub);margin-top:2px;"></div>
+  </div>
+  <div class="drawer-nav">
+    <div class="drawer-section">Navigation</div>
+    <div class="drawer-item" onclick="switchTab('dashboard');closeDrawer()"><span class="di">📊</span>Dashboard</div>
+    <div class="drawer-item" onclick="switchTab('clients');closeDrawer()"><span class="di">👤</span>My Clients</div>
+    <div class="drawer-item" onclick="switchTab('team');closeDrawer()"><span class="di">👥</span>Team Members</div>
+    <div class="drawer-item" onclick="switchTab('alerts');closeDrawer()"><span class="di">🚨</span>See Alerts</div>
+    <div class="drawer-item" onclick="switchTab('visited');closeDrawer()"><span class="di">✅</span>Visited Today</div>
+    <div class="drawer-section">Actions</div>
+    <div class="drawer-item" onclick="openAlertModal();closeDrawer()"><span class="di">🚨</span>Send Alert</div>
+    <div class="drawer-section">Account</div>
+    <div class="drawer-item" onclick="doWatcherLogout()"><span class="di">🚪</span>Logout</div>
+  </div>
+  <div class="drawer-close"><button onclick="closeDrawer()">Close</button></div>
+</div>
+
+<main>
+  <div id="tab-dashboard" style="display:flex;flex-direction:column;gap:14px;">
+    <div class="profile-card">
+      <div class="profile-avatar" id="wProfileAv">RV</div>
+      <div>
+        <div class="profile-name" id="wProfileName">Loading…</div>
+        <div class="profile-role-txt" id="wProfileRole"></div>
+        <div class="profile-stats">
+          <div><div class="pstat-val" id="wClientStatCount">—</div><div class="pstat-lbl">Clients</div></div>
+          <div><div class="pstat-val" id="wAlertCount">—</div><div class="pstat-lbl">Alerts</div></div>
+          <div><div class="pstat-val" id="visitedCount">0</div><div class="pstat-lbl">Visited</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span>⚡</span>Quick Actions</div></div>
+      <div class="action-grid">
+        <div class="action-card" onclick="openCameraForClient(myClients[0]?.id)"><div class="action-icon">📸</div><div class="action-label">Upload Photo</div><div class="action-sub">Today's visit proof</div></div>
+        <div class="action-card" onclick="openAlertModal()"><div class="action-icon">🚨</div><div class="action-label">Send Alert</div><div class="action-sub">Notify a client</div></div>
+        <div class="action-card" onclick="switchTab('alerts')"><div class="action-icon">🔔</div><div class="action-label">See Alerts</div><div class="action-sub" id="wAlertCount2">Active problems</div></div>
+        <div class="action-card" onclick="switchTab('visited')"><div class="action-icon">✅</div><div class="action-label">Visited</div><div class="action-sub">Today's progress</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span>📅</span>Today's Visits</div></div>
+      <div class="stat-strip">
+        <div class="stat-cell"><div class="stat-val" id="visitedCount">0</div><div class="stat-lbl">Visited</div></div>
+        <div class="stat-cell"><div class="stat-val" id="pendingCount">—</div><div class="stat-lbl">Pending</div></div>
+        <div class="stat-cell"><div class="stat-val" id="wAlertCount">0</div><div class="stat-lbl">Alerts</div></div>
+      </div>
+      <div id="pendingList"></div>
+    </div>
+  </div>
+
+  <div id="tab-team" style="display:none;flex-direction:column;gap:14px;">
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span>👥</span>Group A Members</div></div>
+      <div id="memberList"></div>
+    </div>
+  </div>
+
+  <div id="tab-clients" style="display:none;flex-direction:column;gap:14px;">
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span>👤</span>My Clients</div><div class="card-action" id="clientCountLabel"></div></div>
+      <div id="clientList"></div>
+    </div>
+  </div>
+
+  <div id="tab-alerts" style="display:none;flex-direction:column;gap:14px;">
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span>🚨</span>Active Alerts</div><div class="card-action" id="alertCountLabel">0 active</div></div>
+      <div id="alertList"></div>
+    </div>
+  </div>
+
+  <div id="tab-visited" style="display:none;flex-direction:column;gap:14px;">
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span>✅</span>Visited Today</div><div class="card-action" id="visitedCountLabel">0 done</div></div>
+      <div id="visitedList"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title"><span>📸</span>Photos Taken Today</div></div>
+      <div id="visitedPhotoGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;"></div>
+    </div>
+  </div>
+</main>
+
+<div class="bottom-nav">
+  <button class="bn-item active" id="bn-dashboard" onclick="switchTab('dashboard')"><span class="bn-icon">📊</span>Dashboard</button>
+  <button class="bn-item" id="bn-team" onclick="switchTab('team')"><span class="bn-icon">👥</span>Team</button>
+  <button class="bn-item" id="bn-clients" onclick="switchTab('clients')"><span class="bn-icon">👤</span>Clients</button>
+  <button class="bn-item" id="bn-alerts" onclick="switchTab('alerts')"><span class="bn-icon">🚨</span>Alerts</button>
+  <button class="bn-item" id="bn-visited" onclick="switchTab('visited')"><span class="bn-icon">✅</span>Visited</button>
+</div>
+</div><!-- wAppShell -->
+
+<div class="toast" id="toast"></div>
+
+<!-- CALL MODAL -->
+<div class="modal-overlay" id="callModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-av" id="callAv"></div>
+    <div class="modal-nm" id="callName"></div>
+    <div class="modal-rl" id="callRole"></div>
+    <div class="modal-row" id="callPhoneRow" style="display:none;">
+      <button class="mbtn primary" id="callNowBtn">📞 Call Now</button>
+      <button class="mbtn secondary" onclick="closeModal('callModal')">Cancel</button>
+    </div>
+    <div class="modal-row" id="callNoPhoneRow">
+      <button class="mbtn secondary" style="width:100%;" onclick="closeModal('callModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAPTURE MODAL -->
+<input type="file" id="realCameraInput" accept="image/*" capture="environment" style="display:none" onchange="onPhotoSelected(event)">
+<div class="modal-overlay" id="captureModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📸 Take Visit Photo</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:6px;" id="cameraClientName"></div>
+    <div id="gpsStatus" class="gps-tag">📍 Getting GPS…</div>
+    <select class="modal-select" id="captureClientSelect" onchange="captureTargetClientId=this.value"></select>
+    <div class="upload-area" onclick="triggerRealCamera()">
+      <div style="font-size:32px;margin-bottom:8px;">📷</div>
+      <div style="font-size:14px;font-weight:500;">Tap to open camera</div>
+      <div style="font-size:12px;color:var(--sub);margin-top:3px;">Real GPS + timestamp saved automatically</div>
+    </div>
+    <div id="capturePreviewBox" style="display:none;margin-bottom:10px;border-radius:10px;overflow:hidden;border:1px solid var(--border);">
+      <img id="capturePreview" style="width:100%;display:block;" src="">
+      <div id="captureMeta" style="padding:8px 12px;font-size:11px;color:var(--accent);font-weight:500;background:var(--accent-light);"></div>
+    </div>
+    <div class="modal-row">
+      <button class="mbtn primary" id="captureUploadBtn" onclick="submitCapture()" disabled>Upload & Mark Visited</button>
+      <button class="mbtn secondary" onclick="closeModal('captureModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALERT SEND MODAL -->
+<div class="modal-overlay" id="alertModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🚨 Send Alert</div>
+    <select class="modal-select" id="alertClientSelect"><option value="">Select client…</option></select>
+    <textarea class="modal-input" rows="4" id="alertText" placeholder="Describe what you saw — be specific…"></textarea>
+    <div class="modal-row">
+      <button class="mbtn danger" onclick="submitAlert()">Send Alert</button>
+      <button class="mbtn secondary" onclick="closeModal('alertModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALERT DETAIL MODAL -->
+<div class="modal-overlay" id="alertDetailModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🚨 Alert — <span id="adClientName"></span></div>
+    <div class="alert-detail-box"><div class="adb-msg" id="adMsg"></div><div class="adb-time" id="adTime"></div></div>
+    <div class="section-label">Take Action</div>
+    <div class="call-option" onclick="showToast('📞 Calling owner…');closeModal('alertDetailModal')"><div class="call-option-icon">📞</div><div><div class="call-option-label">Call Owner</div><div class="call-option-sub">Direct call to land owner</div></div></div>
+    <div class="call-option" onclick="showToast('👥 Group call with owner started');closeModal('alertDetailModal')"><div class="call-option-icon">👥</div><div><div class="call-option-label">Group Call — With Owner</div><div class="call-option-sub">Team + owner on call</div></div></div>
+    <div class="call-option" onclick="showToast('🛡️ Team-only call started');closeModal('alertDetailModal')"><div class="call-option-icon">🛡️</div><div><div class="call-option-label">Group Call — Without Owner</div><div class="call-option-sub">Team-only discussion first</div></div></div>
+    <button class="mbtn danger" style="width:100%;margin-top:10px;" onclick="if(confirm('Remove this alert?'))deleteAlert()">🗑️ Remove Alert</button>
+    <button class="mbtn secondary" style="width:100%;margin-top:8px;" onclick="closeModal('alertDetailModal')">Close</button>
+  </div>
+</div>
+
+<!-- PLAN MODAL -->
+<div class="modal-overlay" id="planModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="planModalTitle">Client Plan</div>
+    <div id="planModalContent"></div>
+    <button class="mbtn secondary" style="width:100%;margin-top:10px;" onclick="closeModal('planModal')">Close</button>
+  </div>
+</div>
+
+<!-- VISITED PHOTO MODAL -->
+<div class="modal-overlay" id="visitedPhotoModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <img style="width:100%;border-radius:10px;margin-bottom:10px;" src="">
+    <div id="visitedPhotoMeta" style="font-size:12px;color:var(--accent);font-weight:500;text-align:center;margin-bottom:4px;"></div>
+    <input type="hidden" id="visitedPhotoId" value="">
+    <div class="modal-row" style="margin-top:12px;">
+      <button class="mbtn danger" onclick="if(confirm('Delete this photo?'))deletePhoto()">🗑️ Delete</button>
+      <button class="mbtn secondary" onclick="closeModal('visitedPhotoModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F4F0;--surface:#FFF;--border:#E6E4DE;--text:#181815;--sub:#82807A;--accent:#2B6651;--accent-light:#E8F2ED;--alert:#B83232;--alert-light:#FDECEA;--gold:#8A6F2E;--gold-light:#FDF6E3;--r:14px;--sh:0 2px 10px rgba(0,0,0,.055);}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#adminLogin{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+.al-logo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--accent);margin-bottom:4px;}
+.al-logo span{color:var(--text);}
+.al-badge{background:var(--alert);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:28px;}
+.al-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;align-self:flex-start;width:100%;max-width:360px;}
+.al-input{width:100%;max-width:360px;border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);background:var(--surface);outline:none;margin-bottom:12px;}
+.al-input:focus{border-color:var(--accent);}
+.al-btn{width:100%;max-width:360px;padding:14px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+.al-btn:disabled{opacity:.5;cursor:not-allowed;}
+.al-hint{font-size:12px;color:var(--sub);margin-top:16px;text-align:center;line-height:1.6;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--accent);}
+.logo span{color:var(--text);}
+.admin-badge{background:var(--alert);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;}
+main{max-width:480px;margin:0 auto;padding:16px 14px 40px;display:flex;flex-direction:column;gap:16px;}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;}
+.card-head{padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.card-title{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;}
+.form-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
+.field-label{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.field-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;}
+.field-input:focus{border-color:var(--accent);}
+.field-select{width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;cursor:pointer;}
+.field-wrap{display:flex;flex-direction:column;}
+.btn-primary{width:100%;padding:12px;border-radius:10px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-danger{width:100%;padding:10px;border-radius:10px;background:var(--alert);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.stat-row{display:flex;gap:10px;padding:14px 16px;}
+.stat-box{flex:1;background:var(--bg);border-radius:10px;padding:12px;text-align:center;border:1px solid var(--border);}
+.stat-val{font-size:22px;font-weight:700;color:var(--accent);}
+.stat-lbl{font-size:10px;color:var(--sub);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.watcher-row{display:flex;align-items:center;padding:11px 16px;gap:12px;border-bottom:1px solid var(--border);}
+.watcher-row:last-child{border-bottom:none;}
+.wav{width:36px;height:36px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;}
+.w-info{flex:1;}
+.w-name{font-size:13px;font-weight:600;}
+.w-email{font-size:11px;color:var(--sub);}
+.w-role-tag{font-size:10px;font-weight:700;background:var(--accent-light);color:var(--accent);padding:2px 7px;border-radius:4px;}
+.client-row-a{display:flex;align-items:center;padding:11px 16px;gap:12px;border-bottom:1px solid var(--border);}
+.client-row-a:last-child{border-bottom:none;}
+.cav{width:36px;height:36px;border-radius:8px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0;}
+.c-info{flex:1;}
+.c-name{font-size:13px;font-weight:600;}
+.c-email{font-size:11px;color:var(--sub);}
+.plan-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;}
+.plan-normal{background:#EEF2F7;color:#4A6080;}
+.plan-pro{background:var(--accent-light);color:var(--accent);}
+.plan-promax{background:var(--gold-light);color:var(--gold);}
+.code-tag{font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:2px 8px;border-radius:4px;font-family:monospace;}
+.success-box{background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
+.success-box-title{font-size:14px;font-weight:700;color:var(--accent);}
+.success-box-detail{font-size:12px;color:var(--sub);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:900;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);max-width:480px;margin:0 auto;}
+.tab-btn{flex:1;padding:12px 4px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.empty{padding:20px;text-align:center;font-size:13px;color:var(--sub);}
+.admin-info{background:var(--alert-light);border:1px solid #f5c6c2;border-radius:10px;padding:12px 14px;font-size:12px;color:var(--alert);line-height:1.6;}
+</style>
+</head>
+<body>
+
+<!-- ADMIN LOGIN — Firebase Auth only, no hardcoded password -->
+<div id="adminLogin">
+  <div class="al-logo">Land<span>Watch</span></div>
+  <div class="al-badge">Admin Portal</div>
+  <div class="al-hint" style="margin-bottom:20px;max-width:320px;">Login with your admin Firebase account.<br>Only admin@landwatch.com can access this.</div>
+  <div class="al-label">Email</div>
+  <input class="al-input" type="email" id="adminEmail" placeholder="admin@landwatch.com">
+  <div class="al-label">Password</div>
+  <input class="al-input" type="password" id="adminPassword" placeholder="Your admin password" onkeydown="if(event.key==='Enter')doAdminLogin()">
+  <button class="al-btn" id="adminLoginBtn" onclick="doAdminLogin()">Login →</button>
+  <div class="al-hint">Only for LandWatch administrators</div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp" style="display:none;">
+  <div class="topbar">
+    <div class="logo">Land<span>Watch</span> <span style="font-size:12px;color:var(--alert);font-weight:700;">ADMIN</span></div>
+    <button onclick="doAdminLogout()" style="font-size:12px;font-weight:600;color:var(--sub);background:none;border:1px solid var(--border);padding:5px 12px;border-radius:8px;cursor:pointer;">Logout</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-btn-overview" onclick="showAdminTab('overview')">📊 Overview</button>
+    <button class="tab-btn" id="tab-btn-watchers" onclick="showAdminTab('watchers')">🛡️ Watchers</button>
+    <button class="tab-btn" id="tab-btn-clients" onclick="showAdminTab('clients')">👤 Clients</button>
+  </div>
+
+  <main>
+    <!-- OVERVIEW -->
+    <div id="admin-overview">
+      <div class="card">
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-val" id="statWatchers">—</div><div class="stat-lbl">Watchers</div></div>
+          <div class="stat-box"><div class="stat-val" id="statClients">—</div><div class="stat-lbl">Clients</div></div>
+          <div class="stat-box"><div class="stat-val" id="statAlerts">—</div><div class="stat-lbl">Alerts</div></div>
+        </div>
+      </div>
+      <div id="lastCreatedBox" style="display:none;"></div>
+      <div class="admin-info">
+        🔐 Tum sirf admin account se yahan aa sakte ho.<br>
+        Koi bhi password code mein nahi hai — sab Firebase Auth se control hota hai.
+      </div>
+    </div>
+
+    <!-- WATCHERS -->
+    <div id="admin-watchers" style="display:none;">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>➕</span> Create New Watcher</div></div>
+        <div class="form-body">
+          <div class="field-wrap"><div class="field-label">Full Name</div><input class="field-input" id="w_name" placeholder="e.g. Rahul Verma"></div>
+          <div class="field-wrap"><div class="field-label">Email</div><input class="field-input" id="w_email" type="email" placeholder="rahul@landwatch.com"></div>
+          <div class="field-wrap"><div class="field-label">Password</div><input class="field-input" id="w_password" type="password" placeholder="Min 6 characters"></div>
+          <div class="field-wrap"><div class="field-label">Phone (optional)</div><input class="field-input" id="w_phone" type="tel" placeholder="10-digit" maxlength="10"></div>
+          <div class="field-wrap"><div class="field-label">Role</div>
+            <select class="field-select" id="w_role">
+              <option value="Group Leader">Group Leader</option>
+              <option value="Senior Watcher" selected>Senior Watcher</option>
+              <option value="Field Scout">Field Scout</option>
+            </select>
+          </div>
+          <div class="field-wrap"><div class="field-label">Group</div>
+            <select class="field-select" id="w_group">
+              <option value="groupA">Group A — Lucknow</option>
+              <option value="groupB">Group B — Kanpur</option>
+              <option value="groupC">Group C — Unnao</option>
+            </select>
+          </div>
+          <button class="btn-primary" id="createWatcherBtn" onclick="createWatcher()">Create Watcher Account</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>👥</span> All Watchers</div><div style="font-size:12px;color:var(--sub);" id="watcherCountLabel"></div></div>
+        <div id="watcherList"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div id="admin-clients" style="display:none;">
+      <div class="card">
+        <div class="card-head"><div class="card-title"><span>👤</span> All Clients</div><div style="font-size:12px;color:var(--sub);" id="clientCountLabel"></div></div>
+        <div id="clientList"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, getDocs, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCO_3ZIXLJGehvcIeZZqTm1tZTFm0NGtIE",
+  authDomain: "landwatch-f8bf6.firebaseapp.com",
+  databaseURL: "https://landwatch-f8bf6-default-rtdb.firebaseio.com",
+  projectId: "landwatch-f8bf6",
+  storageBucket: "landwatch-f8bf6.firebasestorage.app",
+  messagingSenderId: "37024480482",
+  appId: "1:37024480482:web:a8d07998738b34db02b2bb"
+};
+
+// Main app for admin login
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// SECOND app instance — used ONLY for creating new users
+// This prevents admin from being logged out when creating watcher accounts
+const app2 = initializeApp(firebaseConfig, 'secondary');
+const auth2 = getAuth(app2);
+
+// Admin UID — sirf is UID wala user admin app dekh sakta hai
+// Ye Firebase Console se milega jab admin account banoge
+// Abhi empty hai — neeche step bataya hai
+const ADMIN_UID = '1bR2nwtEqSWo5V9LqsIbzvNyKrF2';
+
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
+
+// Auto check if already logged in
+onAuthStateChanged(auth, async (user) => {
+  if(user && user.uid === ADMIN_UID){
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    loadStats(); loadWatchers(); loadClients();
+  } else if(user) {
+    // Logged in but not admin
+    await signOut(auth);
+    showToast('⚠️ Not an admin account');
+  }
+});
+
+window.doAdminLogin = async function(){
+  const email = document.getElementById('adminEmail').value.trim();
+  const pass = document.getElementById('adminPassword').value.trim();
+  if(!email||!pass){showToast('⚠️ Enter email and password');return;}
+  const btn = document.getElementById('adminLoginBtn');
+  btn.innerHTML='<span class="spinner"></span>'; btn.disabled=true;
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    if(cred.user.uid !== ADMIN_UID){
+      await signOut(auth);
+      showToast('⚠️ This account is not an admin');
+      btn.innerHTML='Login →'; btn.disabled=false;
+      return;
+    }
+    // onAuthStateChanged will handle the rest
+  } catch(e){
+    showToast('⚠️ ' + (e.code==='auth/invalid-credential'?'Wrong email or password':e.message));
+    btn.innerHTML='Login →'; btn.disabled=false;
+  }
+};
+
+window.doAdminLogout = async function(){
+  await signOut(auth);
+  document.getElementById('adminApp').style.display='none';
+  document.getElementById('adminLogin').style.display='flex';
+  document.getElementById('adminEmail').value='';
+  document.getElementById('adminPassword').value='';
+};
+
+window.showAdminTab = function(tab){
+  ['overview','watchers','clients'].forEach(t=>{
+    document.getElementById('admin-'+t).style.display=t===tab?'block':'none';
+    document.getElementById('tab-btn-'+t).classList.toggle('active',t===tab);
+  });
+};
+
+async function loadStats(){
+  try {
+    const [ws,cs,as] = await Promise.all([
+      getDocs(collection(db,'watchers')),
+      getDocs(collection(db,'clients')),
+      getDocs(collection(db,'alerts')),
+    ]);
+    document.getElementById('statWatchers').textContent=ws.size;
+    document.getElementById('statClients').textContent=cs.size;
+    document.getElementById('statAlerts').textContent=as.size;
+  } catch(e){ console.error(e); }
+}
+
+async function loadWatchers(){
+  try {
+    const snap = await getDocs(collection(db,'watchers'));
+    const watchers = snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('watcherCountLabel').textContent=watchers.length+' total';
+    const el = document.getElementById('watcherList');
+    if(!watchers.length){el.innerHTML='<div class="empty">No watchers yet.</div>';return;}
+    el.innerHTML=watchers.map(w=>{
+      const init=(w.name||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
+      return `<div class="watcher-row">
+        <div class="wav">${init}</div>
+        <div class="w-info"><div class="w-name">${w.name||'—'}</div><div class="w-email">${w.email||'—'} · ${w.groupId||'—'}</div></div>
+        <div class="w-role-tag">${w.role||'Watcher'}</div>
+      </div>`;
+    }).join('');
+  } catch(e){ console.error(e); }
+}
+
+async function loadClients(){
+  try {
+    const snap = await getDocs(collection(db,'clients'));
+    const clients = snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('clientCountLabel').textContent=clients.length+' total';
+    const el = document.getElementById('clientList');
+    if(!clients.length){el.innerHTML='<div class="empty">No clients yet.</div>';return;}
+    const planCls={normal:'plan-normal',pro:'plan-pro',promax:'plan-promax'};
+    el.innerHTML=clients.map(c=>{
+      const init=(c.name||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
+      return `<div class="client-row-a">
+        <div class="cav">${init}</div>
+        <div class="c-info"><div class="c-name">${c.name||'—'}</div><div class="c-email">${c.email||'—'}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="code-tag">${c.code||c.id}</span>
+          <span class="plan-tag ${planCls[c.plan]||'plan-normal'}">${c.plan||'normal'}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){ console.error(e); }
+}
+
+window.createWatcher = async function(){
+  const name=document.getElementById('w_name').value.trim();
+  const email=document.getElementById('w_email').value.trim();
+  const password=document.getElementById('w_password').value.trim();
+  const phone=document.getElementById('w_phone').value.trim();
+  const role=document.getElementById('w_role').value;
+  const groupId=document.getElementById('w_group').value;
+  if(!name){showToast('⚠️ Enter name');return;}
+  if(!email.includes('@')){showToast('⚠️ Valid email');return;}
+  if(password.length<6){showToast('⚠️ Password min 6 chars');return;}
+  const btn=document.getElementById('createWatcherBtn');
+  btn.innerHTML='<span class="spinner"></span> Creating…'; btn.disabled=true;
+  try {
+    // Use SECONDARY app — admin stays logged in on main app
+    const cred = await createUserWithEmailAndPassword(auth2, email, password);
+    await setDoc(doc(db,'watchers',cred.user.uid),{
+      uid:cred.user.uid, name, email, phone, role, groupId,
+      createdAt: serverTimestamp(),
+    });
+    // Sign out from secondary app only
+    await signOut(auth2);
+    const box=document.getElementById('lastCreatedBox');
+    box.style.display='block';
+    box.innerHTML=`<div class="success-box">
+      <div class="success-box-title">✅ Watcher Created!</div>
+      <div class="success-box-detail">Name: <b>${name}</b></div>
+      <div class="success-box-detail">Email: ${email}</div>
+      <div class="success-box-detail">Password: ${password}</div>
+      <div class="success-box-detail">Role: ${role} · ${groupId}</div>
+      <div class="success-box-detail" style="margin-top:4px;color:var(--alert);">⚠️ Share credentials with watcher securely</div>
+    </div>`;
+    showToast('✅ Watcher created!');
+    ['w_name','w_email','w_password','w_phone'].forEach(id=>document.getElementById(id).value='');
+    btn.innerHTML='Create Watcher Account'; btn.disabled=false;
+    loadStats(); loadWatchers();
+    showAdminTab('overview');
+  } catch(e){
+    if(e.code==='auth/email-already-in-use') showToast('⚠️ Email already exists');
+    else showToast('⚠️ '+e.message);
+    btn.innerHTML='Create Watcher Account'; btn.disabled=false;
+  }
+};
+</script>
+</body>
+</html>
