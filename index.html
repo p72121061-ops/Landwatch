@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F4F0;--surface:#fff;--border:#E6E4DE;--text:#181815;--sub:#82807A;--green:#2B6651;--greenl:#E8F2ED;--gold:#8A6F2E;--goldl:#FDF6E3;--red:#B83232;--redl:#FDECEA;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;}
+.logo{font-family:'DM Serif Display',serif;font-size:36px;color:var(--green);margin-bottom:4px;}
+.logo span{color:var(--text);}
+.tagline{font-size:13px;color:var(--sub);margin-bottom:48px;}
+.cards{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px;}
+.card{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:20px;cursor:pointer;transition:all .16s;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.09);}
+.card.client{border-color:var(--gold);}
+.card.client:hover{background:var(--goldl);}
+.card.watcher{border-color:var(--green);}
+.card.watcher:hover{background:var(--greenl);}
+.card.admin{border-color:var(--red);}
+.card.admin:hover{background:var(--redl);}
+.ci{font-size:28px;flex-shrink:0;}
+.ct{font-size:15px;font-weight:700;}
+.cs{font-size:11px;color:var(--sub);margin-top:2px;line-height:1.5;}
+.arr{font-size:16px;color:var(--sub);margin-left:auto;flex-shrink:0;}
+.div{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;text-align:center;margin:4px 0;}
+</style>
+</head>
+<body>
+<div class="logo">Land<span>Watch</span></div>
+<div class="tagline">Your land. Always watched.</div>
+<div class="cards">
+  <div class="card client" onclick="location.href='landwatch-client.html'">
+    <div class="ci">👤</div>
+    <div><div class="ct">Client Login</div><div class="cs">View photos, alerts & live camera</div></div>
+    <div class="arr">→</div>
+  </div>
+  <div class="card watcher" onclick="location.href='landwatch-watcher.html'">
+    <div class="ci">🛡️</div>
+    <div><div class="ct">Watcher Login</div><div class="cs">Manage clients, upload photos & alerts</div></div>
+    <div class="arr">→</div>
+  </div>
+  <div class="div">— New here? —</div>
+  <div class="card" onclick="location.href='landwatch-signup.html'" style="border-color:var(--border);">
+    <div class="ci">🌱</div>
+    <div><div class="ct">Register as Client</div><div class="cs">Choose a plan and get your login code</div></div>
+    <div class="arr">→</div>
+  </div>
+  <div class="div">— Admin —</div>
+  <div class="card admin" onclick="location.href='landwatch-admin.html'">
+    <div class="ci">🔐</div>
+    <div><div class="ct">Admin Panel</div><div class="cs">Manage watchers, clients & groups</div></div>
+    <div class="arr">→</div>
+  </div>
+</div>
+</body>
+</html>

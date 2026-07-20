@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F4F0;--surface:#fff;--border:#E6E4DE;--text:#181815;--sub:#82807A;--green:#2B6651;--greenl:#E8F2ED;--red:#B83232;--redl:#FDECEA;--gold:#8A6F2E;--goldl:#FDF6E3;--r:12px;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+#loginWrap{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:10px;}
+.ll{font-family:'DM Serif Display',serif;font-size:30px;color:var(--green);margin-bottom:4px;}
+.ll span{color:var(--text);}
+.badge{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:20px;}
+.lbl{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;align-self:flex-start;width:100%;max-width:340px;}
+.inp{width:100%;max-width:340px;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:var(--surface);}
+.inp:focus{border-color:var(--green);}
+.btn{width:100%;max-width:340px;padding:13px;border-radius:10px;background:var(--green);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.err{font-size:12px;color:var(--red);max-width:340px;text-align:center;}
+
+/* APP */
+#appWrap{display:none;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.topbar-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--green);}
+.topbar-logo span{color:var(--text);}
+.logout-btn{font-size:12px;font-weight:600;color:var(--sub);background:none;border:1px solid var(--border);padding:5px 12px;border-radius:8px;cursor:pointer;}
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);max-width:480px;margin:0 auto;}
+.tab{flex:1;padding:12px 4px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;}
+.tab.on{color:var(--green);border-bottom-color:var(--green);}
+main{max-width:480px;margin:0 auto;padding:16px 14px 40px;display:flex;flex-direction:column;gap:14px;}
+
+/* CARDS */
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;}
+.ch{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ch-title{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;}
+.ch-count{font-size:12px;color:var(--sub);}
+
+/* STATS */
+.stats{display:flex;}
+.stat{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-val{font-size:22px;font-weight:700;color:var(--green);}
+.stat-lbl{font-size:10px;color:var(--sub);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* FORM */
+.form{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.fl{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.fi{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:var(--bg);}
+.fi:focus{border-color:var(--green);}
+.fsel{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:var(--bg);cursor:pointer;}
+.fw{display:flex;flex-direction:column;}
+.fbtn{width:100%;padding:11px;border-radius:8px;background:var(--green);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
+.fbtn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* LISTS */
+.row{display:flex;align-items:center;padding:11px 16px;gap:10px;border-bottom:1px solid var(--border);}
+.row:last-child{border-bottom:none;}
+.av{width:36px;height:36px;border-radius:50%;background:var(--greenl);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green);flex-shrink:0;}
+.av.gold{background:var(--goldl);color:var(--gold);}
+.ri{flex:1;min-width:0;}
+.rn{font-size:13px;font-weight:600;}
+.rs{font-size:11px;color:var(--sub);margin-top:1px;}
+.tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;flex-shrink:0;}
+.tag-g{background:var(--greenl);color:var(--green);}
+.tag-go{background:var(--goldl);color:var(--gold);}
+.tag-b{background:#EEF2F7;color:#4A6080;}
+.code{font-size:11px;font-weight:700;color:var(--green);background:var(--greenl);padding:2px 8px;border-radius:4px;font-family:monospace;}
+
+/* SUCCESS BOX */
+.sbox{background:var(--greenl);border:1px solid var(--green);border-radius:10px;padding:14px;display:none;flex-direction:column;gap:4px;}
+.sbox-title{font-size:14px;font-weight:700;color:var(--green);}
+.sbox-row{font-size:12px;color:var(--sub);}
+.sbox-warn{font-size:11px;color:var(--red);margin-top:4px;}
+
+/* PENDING ASSIGN */
+.assign-row{display:flex;align-items:center;padding:11px 16px;gap:10px;border-bottom:1px solid var(--border);}
+.assign-row:last-child{border-bottom:none;}
+.assign-btn{font-size:11px;font-weight:600;background:var(--green);color:#fff;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;flex-shrink:0;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:18px 20px 36px;width:100%;max-width:480px;animation:sup .22s ease;}
+@keyframes sup{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{width:32px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.mt{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:14px;}
+.mbrow{display:flex;gap:8px;margin-top:12px;}
+.mb{flex:1;padding:11px;border-radius:9px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.mb.p{background:var(--green);color:#fff;}
+.mb.s{background:var(--bg);color:var(--sub);border:1px solid var(--border);}
+
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{padding:20px;text-align:center;font-size:13px;color:var(--sub);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap">
+  <div class="ll">Land<span>Watch</span></div>
+  <div class="badge">Admin Portal</div>
+  <div class="lbl">Email</div>
+  <input class="inp" type="email" id="aEmail" placeholder="admin@landwatch.com">
+  <div class="lbl">Password</div>
+  <input class="inp" type="password" id="aPass" placeholder="Password" onkeydown="if(event.key==='Enter')adminLogin()">
+  <button class="btn" id="loginBtn" onclick="adminLogin()">Login →</button>
+  <div class="err" id="loginErr"></div>
+</div>
+
+<!-- APP -->
+<div id="appWrap">
+  <div class="topbar">
+    <div class="topbar-logo">Land<span>Watch</span> <span style="font-size:11px;color:var(--red);font-weight:700;">ADMIN</span></div>
+    <button class="logout-btn" onclick="adminLogout()">Logout</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="t-overview" onclick="showTab('overview')">📊 Overview</button>
+    <button class="tab" id="t-watchers" onclick="showTab('watchers')">🛡️ Watchers</button>
+    <button class="tab" id="t-clients" onclick="showTab('clients')">👤 Clients</button>
+    <button class="tab" id="t-assign" onclick="showTab('assign')">🔗 Assign</button>
+  </div>
+  <main>
+
+    <!-- OVERVIEW -->
+    <div id="p-overview">
+      <div class="card">
+        <div class="stats">
+          <div class="stat"><div class="stat-val" id="s-w">—</div><div class="stat-lbl">Watchers</div></div>
+          <div class="stat"><div class="stat-val" id="s-c">—</div><div class="stat-lbl">Clients</div></div>
+          <div class="stat"><div class="stat-val" id="s-p">—</div><div class="stat-lbl">Pending</div></div>
+        </div>
+      </div>
+      <div class="sbox" id="lastCreated">
+        <div class="sbox-title">✅ Account Created!</div>
+        <div class="sbox-row" id="lc-name"></div>
+        <div class="sbox-row" id="lc-email"></div>
+        <div class="sbox-row" id="lc-pass"></div>
+        <div class="sbox-warn">⚠️ Share these credentials securely with the watcher</div>
+      </div>
+    </div>
+
+    <!-- WATCHERS -->
+    <div id="p-watchers" style="display:none;">
+      <div class="card">
+        <div class="ch"><div class="ch-title">➕ Create Watcher</div></div>
+        <div class="form">
+          <div class="fw"><div class="fl">Full Name</div><input class="fi" id="w-name" placeholder="e.g. Rahul Verma"></div>
+          <div class="fw"><div class="fl">Email</div><input class="fi" id="w-email" type="email" placeholder="rahul@gmail.com"></div>
+          <div class="fw"><div class="fl">Password</div><input class="fi" id="w-pass" type="password" placeholder="Min 6 characters"></div>
+          <div class="fw"><div class="fl">Phone (optional)</div><input class="fi" id="w-phone" type="tel" placeholder="10-digit" maxlength="10"></div>
+          <div class="fw"><div class="fl">Role</div>
+            <select class="fsel" id="w-role">
+              <option value="Group Leader">Group Leader</option>
+              <option value="Senior Watcher" selected>Senior Watcher</option>
+              <option value="Field Scout">Field Scout</option>
+            </select>
+          </div>
+          <div class="fw"><div class="fl">Group</div>
+            <select class="fsel" id="w-group">
+              <option value="groupA">Group A — Lucknow</option>
+              <option value="groupB">Group B — Kanpur</option>
+              <option value="groupC">Group C — Unnao</option>
+            </select>
+          </div>
+          <button class="fbtn" id="createWBtn" onclick="createWatcher()">Create Watcher Account</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ch-title">👥 All Watchers</div><div class="ch-count" id="wc-count"></div></div>
+        <div id="watcher-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div id="p-clients" style="display:none;">
+      <div class="card">
+        <div class="ch"><div class="ch-title">👤 All Clients</div><div class="ch-count" id="cc-count"></div></div>
+        <div id="client-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- ASSIGN -->
+    <div id="p-assign" style="display:none;">
+      <div style="font-size:13px;color:var(--sub);padding:2px 2px 8px;">Clients waiting to be assigned to a watcher group.</div>
+      <div class="card">
+        <div class="ch"><div class="ch-title">⏳ Pending Assignment</div><div class="ch-count" id="pa-count"></div></div>
+        <div id="pending-list"><div class="empty">Loading…</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ch-title">✅ Assigned Clients</div><div class="ch-count" id="as-count"></div></div>
+        <div id="assigned-list"><div class="empty">Loading…</div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ASSIGN MODAL -->
+<div class="modal-bg" id="assignModal">
+  <div class="modal">
+    <div class="mh"></div>
+    <div class="mt">Assign Client to Group</div>
+    <div style="font-size:13px;color:var(--sub);margin-bottom:12px;" id="modal-client-name"></div>
+    <div class="fw"><div class="fl">Select Group</div>
+      <select class="fsel" id="modal-group">
+        <option value="groupA">Group A — Lucknow</option>
+        <option value="groupB">Group B — Kanpur</option>
+        <option value="groupC">Group C — Unnao</option>
+      </select>
+    </div>
+    <div class="mbrow">
+      <button class="mb p" onclick="confirmAssign()">Assign</button>
+      <button class="mb s" onclick="closeAssignModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FC = {
+  apiKey:"AIzaSyCO_3ZIXLJGehvcIeZZqTm1tZTFm0NGtIE",
+  authDomain:"landwatch-f8bf6.firebaseapp.com",
+  databaseURL:"https://landwatch-f8bf6-default-rtdb.firebaseio.com",
+  projectId:"landwatch-f8bf6",
+  storageBucket:"landwatch-f8bf6.firebasestorage.app",
+  messagingSenderId:"37024480482",
+  appId:"1:37024480482:web:a8d07998738b34db02b2bb"
+};
+
+// Primary app — admin stays logged in
+const app = initializeApp(FC);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Secondary app — for creating watcher accounts without logging out admin
+const app2 = initializeApp(FC, 'secondary');
+const auth2 = getAuth(app2);
+
+const ADMIN_UID = '1bR2nwtEqSWo5V9LqsIbzvNyKrF2';
+
+// ── TOAST ──
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+
+// ── AUTH ──
+onAuthStateChanged(auth, user => {
+  if(user && user.uid === ADMIN_UID){
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('appWrap').style.display='block';
+    loadAll();
+  } else if(user){
+    signOut(auth);
+    document.getElementById('loginErr').textContent='⚠️ Not an admin account';
+  }
+});
+
+window.adminLogin = async function(){
+  const email = document.getElementById('aEmail').value.trim();
+  const pass = document.getElementById('aPass').value;
+  if(!email||!pass){ document.getElementById('loginErr').textContent='⚠️ Enter email and password'; return; }
+  const btn = document.getElementById('loginBtn');
+  btn.innerHTML='<span class="spin"></span>'; btn.disabled=true;
+  document.getElementById('loginErr').textContent='';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e){
+    document.getElementById('loginErr').textContent = e.code==='auth/invalid-credential' ? '⚠️ Wrong email or password' : '⚠️ '+e.message;
+    btn.innerHTML='Login →'; btn.disabled=false;
+  }
+};
+
+window.adminLogout = async function(){
+  await signOut(auth);
+  document.getElementById('appWrap').style.display='none';
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('aEmail').value='';
+  document.getElementById('aPass').value='';
+  document.getElementById('loginBtn').innerHTML='Login →';
+  document.getElementById('loginBtn').disabled=false;
+};
+
+// ── TABS ──
+window.showTab = function(tab){
+  ['overview','watchers','clients','assign'].forEach(t=>{
+    document.getElementById('p-'+t).style.display = t===tab?'flex':'none';
+    if(document.getElementById('p-'+t).style.display==='flex') document.getElementById('p-'+t).style.flexDirection='column';
+    document.getElementById('t-'+t).classList.toggle('on', t===tab);
+  });
+  if(tab==='watchers') loadWatchers();
+  if(tab==='clients') loadClients();
+  if(tab==='assign') loadAssign();
+};
+
+// ── LOAD ALL ──
+async function loadAll(){
+  try {
+    const [ws,cs] = await Promise.all([getDocs(collection(db,'watchers')), getDocs(collection(db,'clients'))]);
+    document.getElementById('s-w').textContent = ws.size;
+    document.getElementById('s-c').textContent = cs.size;
+    const pending = cs.docs.filter(d=>!d.data().assignedWatcherGroup||d.data().assignedWatcherGroup==='pending');
+    document.getElementById('s-p').textContent = pending.length;
+  } catch(e){ console.error(e); }
+}
+
+// ── WATCHERS ──
+async function loadWatchers(){
+  const el = document.getElementById('watcher-list');
+  try {
+    const snap = await getDocs(collection(db,'watchers'));
+    document.getElementById('wc-count').textContent = snap.size+' total';
+    if(!snap.size){ el.innerHTML='<div class="empty">No watchers yet</div>'; return; }
+    el.innerHTML = snap.docs.map(d=>{
+      const w=d.data();
+      const init=(w.name||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
+      const groupLabel = {'groupA':'Group A','groupB':'Group B','groupC':'Group C'}[w.groupId]||w.groupId||'—';
+      return `<div class="row">
+        <div class="av">${init}</div>
+        <div class="ri"><div class="rn">${w.name||'—'}</div><div class="rs">${w.email||'—'} · ${groupLabel}</div></div>
+        <div class="tag tag-g">${w.role||'Watcher'}</div>
+      </div>`;
+    }).join('');
+  } catch(e){ el.innerHTML='<div class="empty">Error loading</div>'; }
+}
+
+// ── CLIENTS ──
+async function loadClients(){
+  const el = document.getElementById('client-list');
+  try {
+    const snap = await getDocs(collection(db,'clients'));
+    document.getElementById('cc-count').textContent = snap.size+' total';
+    if(!snap.size){ el.innerHTML='<div class="empty">No clients yet</div>'; return; }
+    const planCls = {normal:'tag-b',pro:'tag-g',promax:'tag-go'};
+    el.innerHTML = snap.docs.map(d=>{
+      const c=d.data();
+      const init=(c.name||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
+      const groupLabel = {'groupA':'Group A','groupB':'Group B','groupC':'Group C','pending':'Unassigned'}[c.assignedWatcherGroup]||'Unassigned';
+      return `<div class="row">
+        <div class="av gold">${init}</div>
+        <div class="ri"><div class="rn">${c.name||'—'}</div><div class="rs">${c.email||'—'} · ${groupLabel}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="code">${c.code||d.id}</span>
+          <span class="tag ${planCls[c.plan]||'tag-b'}">${c.plan||'normal'}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){ el.innerHTML='<div class="empty">Error loading</div>'; }
+}
+
+// ── ASSIGN ──
+let pendingClients = [];
+let assigningClientId = null;
+
+async function loadAssign(){
+  try {
+    const snap = await getDocs(collection(db,'clients'));
+    const all = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const pending = all.filter(c=>!c.assignedWatcherGroup||c.assignedWatcherGroup==='pending');
+    const assigned = all.filter(c=>c.assignedWatcherGroup&&c.assignedWatcherGroup!=='pending');
+    pendingClients = pending;
+
+    document.getElementById('pa-count').textContent = pending.length+' pending';
+    document.getElementById('as-count').textContent = assigned.length+' assigned';
+
+    const pel = document.getElementById('pending-list');
+    if(!pending.length){ pel.innerHTML='<div class="empty">No pending clients 🎉</div>'; }
+    else {
+      pel.innerHTML = pending.map(c=>{
+        const init=(c.name||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
+        return `<div class="assign-row">
+          <div class="av gold">${init}</div>
+          <div class="ri"><div class="rn">${c.name||'—'}</div><div class="rs">${c.email||'—'} · <span class="code">${c.code||c.id}</span></div></div>
+          <button class="assign-btn" onclick="openAssignModal('${c.id}','${c.name||''}')">Assign →</button>
+        </div>`;
+      }).join('');
+    }
+
+    const ael = document.getElementById('assigned-list');
+    if(!assigned.length){ ael.innerHTML='<div class="empty">No assigned clients yet</div>'; }
+    else {
+      const groupLabel = {'groupA':'Group A','groupB':'Group B','groupC':'Group C'};
+      ael.innerHTML = assigned.map(c=>{
+        const init=(c.name||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
+        return `<div class="row">
+          <div class="av gold">${init}</div>
+          <div class="ri"><div class="rn">${c.name||'—'}</div><div class="rs">${groupLabel[c.assignedWatcherGroup]||c.assignedWatcherGroup}</div></div>
+          <span class="code">${c.code||c.id}</span>
+        </div>`;
+      }).join('');
+    }
+  } catch(e){ console.error(e); }
+}
+
+window.openAssignModal = function(clientId, clientName){
+  assigningClientId = clientId;
+  document.getElementById('modal-client-name').textContent = clientName;
+  document.getElementById('assignModal').classList.add('open');
+};
+
+window.closeAssignModal = function(){
+  document.getElementById('assignModal').classList.remove('open');
+  assigningClientId = null;
+};
+
+window.confirmAssign = async function(){
+  if(!assigningClientId) return;
+  const group = document.getElementById('modal-group').value;
+  try {
+    await updateDoc(doc(db,'clients',assigningClientId),{ assignedWatcherGroup: group });
+    toast('✅ Client assigned to '+group);
+    closeAssignModal();
+    loadAssign();
+    loadAll();
+  } catch(e){ toast('⚠️ Error: '+e.message); }
+};
+
+// ── CREATE WATCHER ──
+window.createWatcher = async function(){
+  const name = document.getElementById('w-name').value.trim();
+  const email = document.getElementById('w-email').value.trim();
+  const pass = document.getElementById('w-pass').value.trim();
+  const phone = document.getElementById('w-phone').value.trim();
+  const role = document.getElementById('w-role').value;
+  const groupId = document.getElementById('w-group').value;
+  if(!name){ toast('⚠️ Enter name'); return; }
+  if(!email.includes('@')){ toast('⚠️ Valid email required'); return; }
+  if(pass.length<6){ toast('⚠️ Password min 6 characters'); return; }
+  const btn = document.getElementById('createWBtn');
+  btn.innerHTML='<span class="spin"></span> Creating…'; btn.disabled=true;
+  try {
+    // Use secondary app — admin stays logged in on primary app
+    const cred = await createUserWithEmailAndPassword(auth2, email, pass);
+    await setDoc(doc(db,'watchers',cred.user.uid),{
+      uid: cred.user.uid, name, email, phone, role, groupId,
+      createdAt: serverTimestamp()
+    });
+    await signOut(auth2);
+    // Show success
+    const box = document.getElementById('lastCreated');
+    document.getElementById('lc-name').textContent = 'Name: '+name;
+    document.getElementById('lc-email').textContent = 'Email: '+email;
+    document.getElementById('lc-pass').textContent = 'Password: '+pass;
+    box.style.display='flex';
+    toast('✅ Watcher created!');
+    ['w-name','w-email','w-pass','w-phone'].forEach(id=>document.getElementById(id).value='');
+    btn.innerHTML='Create Watcher Account'; btn.disabled=false;
+    loadAll();
+    showTab('overview');
+  } catch(e){
+    toast(e.code==='auth/email-already-in-use'?'⚠️ Email already exists':'⚠️ '+e.message);
+    btn.innerHTML='Create Watcher Account'; btn.disabled=false;
+  }
+};
+</script>
+</body>
+</html>
