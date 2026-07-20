@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandWatch — Register</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F5F4F0;--surface:#fff;--border:#E6E4DE;--text:#181815;--sub:#82807A;--green:#2B6651;--greenl:#E8F2ED;--gold:#8A6F2E;--goldl:#FDF6E3;--r:12px;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.tl{font-family:'DM Serif Display',serif;font-size:18px;color:var(--green);}
+.tl span{color:var(--text);}
+.tlink{font-size:13px;font-weight:600;color:var(--green);cursor:pointer;background:var(--greenl);padding:6px 14px;border-radius:8px;}
+main{max-width:480px;margin:0 auto;padding:20px 14px 60px;display:flex;flex-direction:column;gap:14px;}
+.stepper{display:flex;align-items:center;}
+.sc{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--sub);flex-shrink:0;transition:all .2s;}
+.sc.on{border-color:var(--green);background:var(--green);color:#fff;}
+.sc.done{border-color:var(--green);background:var(--greenl);color:var(--green);}
+.sl{font-size:11px;font-weight:600;color:var(--sub);}
+.sl.on{color:var(--green);}
+.sline{flex:1;height:2px;background:var(--border);margin:0 6px;}
+.sline.done{background:var(--green);}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;}
+.ch{padding:14px 16px;border-bottom:1px solid var(--border);}
+.ct{font-family:'DM Serif Display',serif;font-size:18px;}
+.cs{font-size:12px;color:var(--sub);margin-top:2px;}
+.form{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.fl{font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.fi{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:var(--bg);}
+.fi:focus{border-color:var(--green);}
+.fw{display:flex;flex-direction:column;}
+.btn-p{width:100%;padding:13px;border-radius:10px;background:var(--green);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;}
+.btn-s{width:100%;padding:11px;border-radius:10px;background:var(--bg);color:var(--sub);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;}
+.back{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--sub);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;}
+.plan-card{border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;position:relative;margin-bottom:8px;}
+.plan-card.sel{border-color:var(--green);background:var(--greenl);}
+.plan-card.gold.sel{border-color:var(--gold);background:var(--goldl);}
+.plan-card:last-child{margin-bottom:0;}
+.pbest{position:absolute;top:10px;right:10px;background:var(--gold);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.psel{position:absolute;top:10px;right:10px;background:var(--green);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.gold .psel{background:var(--gold);}
+.pname{font-size:15px;font-weight:700;margin-bottom:6px;}
+.pprice{font-size:12px;color:var(--sub);margin-bottom:8px;}
+.pf{font-size:12px;color:var(--sub);padding:2px 0;display:flex;align-items:center;gap:6px;}
+.pf::before{content:"✓";color:var(--green);font-weight:700;}
+.gold .pf::before{color:var(--gold);}
+.pay-sum{background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:12px;border:1px solid var(--border);}
+.pr{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
+.pr.tot{font-weight:700;font-size:14px;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;}
+.pm{border:1.5px solid var(--border);border-radius:8px;padding:11px 13px;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:8px;transition:all .15s;}
+.pm:last-child{margin-bottom:0;}
+.pm.sel{border-color:var(--green);background:var(--greenl);}
+.pm-icon{font-size:18px;}
+.pm-lbl{font-size:13px;font-weight:600;flex:1;}
+.pm-sub{font-size:11px;color:var(--sub);}
+.radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.radio.on{border-color:var(--green);}
+.radio.on::after{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);}
+.success{padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.si{font-size:50px;}
+.st{font-family:'DM Serif Display',serif;font-size:24px;}
+.ss{font-size:13px;color:var(--sub);line-height:1.6;}
+.code-box{background:var(--greenl);border:1.5px solid var(--green);border-radius:10px;padding:18px;width:100%;text-align:center;}
+.code-lbl{font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.code-val{font-family:'DM Serif Display',serif;font-size:30px;color:var(--green);letter-spacing:2px;}
+.code-hint{font-size:11px;color:var(--sub);margin-top:4px;}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--goldl);border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tl">Land<span>Watch</span></div>
+  <div class="tlink" onclick="window.location.href='landwatch-client.html'">Login →</div>
+</div>
+<main id="main"></main>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDocs, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FC={apiKey:"AIzaSyCO_3ZIXLJGehvcIeZZqTm1tZTFm0NGtIE",authDomain:"landwatch-f8bf6.firebaseapp.com",databaseURL:"https://landwatch-f8bf6-default-rtdb.firebaseio.com",projectId:"landwatch-f8bf6",storageBucket:"landwatch-f8bf6.firebasestorage.app",messagingSenderId:"37024480482",appId:"1:37024480482:web:a8d07998738b34db02b2bb"};
+const app=initializeApp(FC); const auth=getAuth(app); const db=getFirestore(app);
+
+const plans={
+  normal:{name:'Normal',icon:'🌱',price:499,features:['Daily visit photos'],gold:false},
+  pro:{name:'Pro',icon:'⭐',price:999,features:['Daily visit photos','Alerts with consultant','Up to 2 properties'],gold:false},
+  promax:{name:'Pro Max',icon:'🚀',price:1999,features:['Daily visit photos','Alerts with consultant','Live camera feed','Up to 5 properties'],gold:true}
+};
+
+let S={step:1,name:'',phone:'',email:'',pass:'',city:'',plan:null,payment:null,code:null};
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+function stepper(cur){
+  const steps=[{n:1,l:'Details'},{n:2,l:'Plan'},{n:3,l:'Payment'},{n:4,l:'Done'}];
+  return `<div class="stepper">${steps.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:5px;">
+      <div class="sc ${cur>s.n?'done':cur===s.n?'on':''}">${cur>s.n?'✓':s.n}</div>
+      <div class="sl ${cur===s.n?'on':''}">${s.l}</div>
+    </div>${i<steps.length-1?`<div class="sline ${cur>s.n?'done':''}"></div>`:''}`).join('')}</div>`;
+}
+
+function step1(){
+  document.getElementById('main').innerHTML=`
+    ${stepper(1)}
+    <div class="card">
+      <div class="ch"><div class="ct">Create your account</div><div class="cs">Enter your details below</div></div>
+      <div class="form">
+        <div class="fw"><div class="fl">Full Name</div><input class="fi" id="s-name" placeholder="e.g. Rahul Singh" value="${S.name}"></div>
+        <div class="fw"><div class="fl">Phone</div><input class="fi" id="s-phone" type="tel" placeholder="10-digit mobile number" value="${S.phone}" maxlength="10"></div>
+        <div class="fw"><div class="fl">Email</div><input class="fi" id="s-email" type="email" placeholder="your@email.com" value="${S.email}"></div>
+        <div class="fw"><div class="fl">Password</div><input class="fi" id="s-pass" type="password" placeholder="Min 6 characters" value="${S.pass}"></div>
+        <div class="fw"><div class="fl">City / Area</div><input class="fi" id="s-city" placeholder="e.g. Lucknow, UP" value="${S.city}"></div>
+        <button class="btn-p" onclick="go1()">Continue →</button>
+      </div>
+    </div>`;
+}
+
+window.go1=function(){
+  const name=document.getElementById('s-name').value.trim();
+  const phone=document.getElementById('s-phone').value.trim();
+  const email=document.getElementById('s-email').value.trim();
+  const pass=document.getElementById('s-pass').value;
+  const city=document.getElementById('s-city').value.trim();
+  if(!name){toast('⚠️ Enter your name');return;}
+  if(!/^\d{10}$/.test(phone)){toast('⚠️ Enter 10-digit phone');return;}
+  if(!email.includes('@')){toast('⚠️ Enter valid email');return;}
+  if(pass.length<6){toast('⚠️ Password min 6 characters');return;}
+  if(!city){toast('⚠️ Enter your city');return;}
+  Object.assign(S,{name,phone,email,pass,city});
+  S.step=2; step2();
+};
+
+function step2(){
+  document.getElementById('main').innerHTML=`
+    ${stepper(2)}
+    <button class="back" onclick="S.step=1;step1()">← Back</button>
+    <div class="card">
+      <div class="ch"><div class="ct">Choose your plan</div><div class="cs">You can upgrade anytime</div></div>
+      <div class="form">
+        ${Object.entries(plans).map(([key,p])=>`
+          <div class="plan-card ${p.gold?'gold':''} ${S.plan===key?'sel':''}" onclick="selectPlan('${key}')">
+            ${p.gold&&S.plan!==key?'<div class="pbest">Best</div>':''}
+            ${S.plan===key?'<div class="psel">Selected ✓</div>':''}
+            <div class="pname">${p.icon} ${p.name}</div>
+            <div class="pprice">₹${p.price.toLocaleString('en-IN')}/month</div>
+            ${p.features.map(f=>`<div class="pf">${f}</div>`).join('')}
+          </div>`).join('')}
+        <button class="btn-p" id="planNextBtn" onclick="go2()" ${!S.plan?'disabled':''}>Continue →</button>
+      </div>
+    </div>`;
+}
+
+window.selectPlan = function(key){
+  S.plan = key;
+  // Update UI without full re-render to avoid losing state
+  document.querySelectorAll('.plan-card').forEach(el => el.classList.remove('sel'));
+  const cards = document.querySelectorAll('.plan-card');
+  const planKeys = Object.keys(plans);
+  const idx = planKeys.indexOf(key);
+  if(cards[idx]){
+    cards[idx].classList.add('sel');
+    // Update badge
+    cards[idx].querySelectorAll('.pbest,.psel').forEach(b=>b.remove());
+    const badge = document.createElement('div');
+    badge.className = 'psel';
+    badge.textContent = 'Selected ✓';
+    cards[idx].insertBefore(badge, cards[idx].firstChild);
+  }
+  // Remove sel + badges from others
+  cards.forEach((el,i)=>{
+    if(i!==idx){
+      el.classList.remove('sel');
+      el.querySelectorAll('.psel').forEach(b=>b.remove());
+      // Restore best badge for promax if needed
+      if(planKeys[i]==='promax'&&!el.querySelector('.pbest')){
+        const b=document.createElement('div');b.className='pbest';b.textContent='Best';
+        el.insertBefore(b,el.firstChild);
+      }
+    }
+  });
+  // Enable next button
+  const btn = document.getElementById('planNextBtn');
+  if(btn) btn.disabled = false;
+};
+
+window.go2=function(){if(!S.plan){toast('⚠️ Select a plan');return;}S.step=3;step3();};
+
+function step3(){
+  const p=plans[S.plan];
+  document.getElementById('main').innerHTML=`
+    ${stepper(3)}
+    <button class="back" onclick="S.step=2;step2()">← Back</button>
+    <div class="card">
+      <div class="ch"><div class="ct">Payment</div><div class="cs">Secure checkout</div></div>
+      <div class="form">
+        <div class="pay-sum">
+          <div class="pr"><span>Plan</span><span>${p.name}</span></div>
+          <div class="pr"><span>Name</span><span>${S.name}</span></div>
+          <div class="pr tot"><span>Total</span><span>₹${p.price.toLocaleString('en-IN')}/mo</span></div>
+        </div>
+        ${[{k:'upi',ic:'📱',l:'UPI',s:'Google Pay, PhonePe, Paytm'},{k:'card',ic:'💳',l:'Card',s:'Visa, Mastercard, RuPay'},{k:'net',ic:'🏦',l:'Net Banking',s:'All major banks'}].map(m=>`
+          <div class="pm ${S.payment===m.k?'sel':''}" id="pm-${m.k}" onclick="selectPayment('${m.k}')">
+            <div class="pm-icon">${m.ic}</div>
+            <div><div class="pm-lbl">${m.l}</div><div class="pm-sub">${m.s}</div></div>
+            <div class="radio ${S.payment===m.k?'on':''}" id="radio-${m.k}"></div>
+          </div>`).join('')}
+        <button class="btn-p" id="payBtn" onclick="go3()" ${!S.payment?'disabled':''}>Pay ₹${p.price.toLocaleString('en-IN')} →</button>
+      </div>
+    </div>`;
+}
+
+window.selectPayment = function(key){
+  S.payment = key;
+  // Update UI without re-render
+  ['upi','card','net'].forEach(k=>{
+    const pm = document.getElementById('pm-'+k);
+    const radio = document.getElementById('radio-'+k);
+    if(pm) pm.classList.toggle('sel', k===key);
+    if(radio){ radio.classList.toggle('on', k===key); }
+  });
+  const btn = document.getElementById('payBtn');
+  if(btn) btn.disabled = false;
+};
+
+window.go3=async function(){
+  if(!S.payment){toast('⚠️ Select payment method');return;}
+  const btn=document.getElementById('payBtn');
+  btn.innerHTML='<span class="spin"></span> Processing…';btn.disabled=true;
+  try {
+    // Create Firebase Auth user
+    const cred=await createUserWithEmailAndPassword(auth,S.email,S.pass);
+    const uid=cred.user.uid;
+    // Generate unique code
+    const snap=await getDocs(collection(db,'clients'));
+    const existing=snap.docs.map(d=>d.id);
+    let n=snap.size+1;
+    let code='LW-'+String(n).padStart(3,'0');
+    while(existing.includes(code)){n++;code='LW-'+String(n).padStart(3,'0');}
+    S.code=code;
+    // Save to Firestore — assignedWatcherGroup is 'pending' until admin assigns
+    await setDoc(doc(db,'clients',code),{
+      uid,code,name:S.name,phone:S.phone,email:S.email,city:S.city,
+      plan:S.plan,
+      init:S.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(),
+      properties:[{label:S.city+' — Property 1',camera:false}],
+      assignedWatcherGroup:'pending',
+      createdAt:serverTimestamp()
+    });
+    // Sign out — user logs in manually
+    await signOut(auth);
+    S.step=4;step4();
+  } catch(e){
+    if(e.code==='auth/email-already-in-use') toast('⚠️ Email already registered');
+    else toast('⚠️ '+e.message);
+    btn.innerHTML='Pay ₹'+plans[S.plan].price.toLocaleString('en-IN')+' →';btn.disabled=false;
+  }
+};
+
+function step4(){
+  const p=plans[S.plan];
+  document.getElementById('main').innerHTML=`
+    ${stepper(4)}
+    <div class="card">
+      <div class="success">
+        <div class="si">🎉</div>
+        <div class="st">Welcome to LandWatch!</div>
+        <div class="ss">Account created. Your group will be assigned shortly by admin. Use your code + email to login.</div>
+        <div class="code-box">
+          <div class="code-lbl">Your Login Code</div>
+          <div class="code-val">${S.code}</div>
+          <div class="code-hint">Save this — needed every time you login</div>
+        </div>
+        <div class="pill">${p.icon} ${p.name} · ₹${p.price.toLocaleString('en-IN')}/mo</div>
+        <div style="font-size:12px;color:var(--sub);text-align:center;line-height:1.8;">Name: <b>${S.name}</b><br>Email: ${S.email}</div>
+      </div>
+      <div class="form">
+        <button class="btn-p" onclick="window.location.href='landwatch-client.html'">Go to Login →</button>
+        <button class="btn-s" onclick="reset()">Register Another</button>
+      </div>
+    </div>`;
+}
+
+window.reset=function(){
+  S={step:1,name:'',phone:'',email:'',pass:'',city:'',plan:null,payment:null,code:null};
+  step1();
+};
+
+step1();
+</script>
+</body>
+</html>
