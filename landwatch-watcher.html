@@ -233,7 +233,13 @@ main{max-width:480px;margin:0 auto;padding:14px 14px 100px;display:flex;flex-dir
     <!-- ALERTS -->
     <div id="tab-alerts" style="display:none;flex-direction:column;gap:13px;">
       <div class="card">
-        <div class="ch"><div class="ch-title">🚨 Active Alerts</div><div class="ch-action" id="alertCountLabel">0 active</div></div>
+        <div class="ch">
+          <div class="ch-title">🚨 Active Alerts</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="ch-action" id="alertCountLabel">0 active</div>
+            <button onclick="clearAllAlerts()" style="font-size:10px;font-weight:700;background:#fff0f0;color:var(--red);border:1px solid #fcc;padding:3px 8px;border-radius:6px;cursor:pointer;">Clear All</button>
+          </div>
+        </div>
         <div id="alertList"><div class="empty">No alerts</div></div>
       </div>
     </div>
@@ -486,8 +492,24 @@ window.renderClients=function(){
       <div class="icon-btns">
         <div class="ib" onclick="openCall('${(c.init||'??')}','${c.name||''}','Client','${c.phone||''}')">📞</div>
         <div class="ib" onclick="openCamModal('${c.id}')">📷</div>
+        <div class="ib" style="background:#fff0f0;border-color:#fcc;" title="Delete photos" onclick="deleteClientPhotos('${c.id}','${c.name||''}')">🗑️</div>
       </div>
     </div>`).join('');
+};
+
+// Delete all photos for a specific client
+window.deleteClientPhotos = async function(clientId, clientName){
+  if(!confirm('Delete ALL photos for '+clientName+'? This cannot be undone.')) return;
+  try{
+    const snap = await getDocs(query(collection(db,'photos'),where('clientId','==',clientId)));
+    if(!snap.size){ toast('No photos found for this client'); return; }
+    await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,'photos',d.id))));
+    // Unmark visited
+    const ci = myClients.findIndex(c=>c.id===clientId);
+    if(ci>-1) myClients[ci].visited=false;
+    renderPending();
+    toast('🗑️ Deleted '+snap.size+' photos for '+clientName);
+  }catch(e){ toast('⚠️ '+e.message); }
 };
 
 // ── TEAM ──
@@ -691,6 +713,18 @@ window.submitAlert=async function(){
     toast('🚨 Alert sent!');closeModal('alertSendModal');
     btn.innerHTML='Send Alert';btn.disabled=false;
   }catch(e){toast('⚠️ '+e.message);btn.innerHTML='Send Alert';btn.disabled=false;}
+};
+
+// ── CLEAR ALL ALERTS ──
+window.clearAllAlerts = async function(){
+  const gid = WD.groupId||'groupA';
+  if(!confirm('Clear all alerts for your group?')) return;
+  try{
+    const snap = await getDocs(query(collection(db,'alerts'),where('watcherGroup','==',gid)));
+    if(!snap.size){ toast('No alerts to clear'); return; }
+    await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,'alerts',d.id))));
+    toast('✅ Cleared '+snap.size+' alerts');
+  }catch(e){ toast('⚠️ '+e.message); }
 };
 
 // ── CALL ──
